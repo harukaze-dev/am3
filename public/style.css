@@ -66,14 +66,24 @@ select:focus, #nickname-input:focus { outline: none; border-color: var(--primary
 #profile-preview:hover { transform: scale(1.05); }
 
 /* --- 채팅방 스타일 --- */
-/* [추가됨] 채팅방 컨테이너 */
 #chat-container {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
     width: 100%;
 }
-#chat-wrapper { width: 100%; max-width: 800px; height: 85vh; display: flex; flex-direction: column; background-color: #40444b; box-shadow: 0 4px 20px rgba(0,0,0,0.2); border-radius: 10px; overflow: hidden; }
+#chat-wrapper { 
+    width: 100%; 
+    max-width: 800px; 
+    height: 85vh; 
+    display: flex; 
+    flex-direction: column; 
+    background-color: #40444b; 
+    box-shadow: 0 4px 20px rgba(0,0,0,0.2); 
+    border-radius: 10px; 
+    overflow: hidden;
+    margin: 0 auto; /* 중앙 정렬을 위해 추가 */
+    /* [수정됨] 채팅창 왼쪽으로 이동 */
+    transform: translateX(-15vw);
+    transition: transform 0.5s ease-out, opacity 0.5s ease-out;
+}
 #chat-header { padding: 0.75rem 1rem; background-color: #36393f; color: white; display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; gap: 1rem; border-bottom: 1px solid #2f3136; }
 #chat-header h3 { margin: 0; text-align: center; grid-column: 2 / 3; }
 #chat-header > button:first-of-type { justify-self: start; }
@@ -152,25 +162,8 @@ select:focus, #nickname-input:focus { outline: none; border-color: var(--primary
 .player-name { flex-grow: 1; font-weight: 500; text-align: left; }
 .kick-btn { background-color: var(--kick-color); color: white; border: none; border-radius: 5px; padding: 0.4rem 0.8rem; cursor: pointer; font-weight: 700; transition: background-color 0.2s; }
 .kick-btn:hover { background-color: var(--kick-hover); }
-
-/* [추가됨] 방 나가기 버튼 스타일 */
-#leave-room-btn {
-    margin-top: 1.5rem;
-    padding: 0.75rem 2rem;
-    background-color: rgba(255, 255, 255, 0.2);
-    color: white;
-    border: 1px solid rgba(255, 255, 255, 0.5);
-    border-radius: 50px;
-    cursor: pointer;
-    font-weight: 700;
-    font-size: 1rem;
-    transition: all 0.2s ease;
-}
-#leave-room-btn:hover {
-    background-color: rgba(255, 255, 255, 0.3);
-    transform: translateY(-2px);
-}
-
+#leave-room-btn { margin-top: 1.5rem; padding: 0.75rem 2rem; background-color: rgba(255, 255, 255, 0.2); color: white; border: 1px solid rgba(255, 255, 255, 0.5); border-radius: 50px; cursor: pointer; font-weight: 700; font-size: 1rem; transition: all 0.2s ease; }
+#leave-room-btn:hover { background-color: rgba(255, 255, 255, 0.3); transform: translateY(-2px); }
 #messages, #fan-card-container, #player-list-container { scrollbar-width: thin; scrollbar-color: #6c757d #2f3136; }
 #messages::-webkit-scrollbar, #fan-card-container::-webkit-scrollbar, #player-list-container::-webkit-scrollbar { width: 8px; }
 #messages::-webkit-scrollbar-track, #fan-card-container::-webkit-scrollbar-track, #player-list-container::-webkit-scrollbar-track { background: #2f3136; border-radius: 10px; }
