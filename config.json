@@ -1,0 +1,49 @@
+{
+    "streamers": [
+        {
+            "id": "yeonri",
+            "name": "연리",
+            "pfp": "/images/streamer_yeonri.png",
+            "fandom": {
+                "id": "yeonbab",
+                "name": "연밥",
+                "pfp": "/images/fan_yeonbab.png",
+                "superFanPfp": "/images/fan_super_yeonbab.png",
+                "tiers": [
+                    { "name": "연밥", "isSuperFan": false },
+                    { "name": "개쩌는 연밥", "isSuperFan": true }
+                ]
+            }
+        },
+        {
+            "id": "morara",
+            "name": "모라라",
+            "pfp": "/images/streamer_morara.png",
+            "fandom": {
+                "id": "coral",
+                "name": "코랄단",
+                "pfp": "/images/fan_coral.png",
+                "superFanPfp": "/images/fan_super_coral.png",
+                "tiers": [
+                    { "name": "코랄단", "isSuperFan": false },
+                    { "name": "코랄기사단", "isSuperFan": true }
+                ]
+            }
+        },
+        {
+            "id": "haeblin",
+            "name": "해블린",
+            "pfp": "/images/streamer_haeblin.png",
+            "fandom": {
+                "id": "digdan",
+                "name": "디그단",
+                "pfp": "/images/fan_digdan.png",
+                "superFanPfp": "/images/fan_super_digdan.png",
+                "tiers": [
+                    { "name": "디그단", "isSuperFan": false },
+                    { "name": "디그디그디그단", "isSuperFan": true }
+                ]
+            }
+        }
+    ]
+}
