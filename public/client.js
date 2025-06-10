@@ -10,11 +10,15 @@ let userIntent = null; // 'create' or 'join'
 let roomToJoin = null;
 
 // --- 사운드 설정 ---
-let isSoundEnabled = localStorage.getItem('soundEnabled') !== 'false'; // 로컬 스토리지에서 설정 불러오기, 기본값은 true
+let isSoundEnabled = localStorage.getItem('soundEnabled') !== 'false';
 const chatSound = document.getElementById('chat-sound');
 const joinSound = document.getElementById('join-sound');
 const leaveSound = document.getElementById('leave-sound');
 const specialSound = document.getElementById('special-sound');
+
+// [추가됨] 모든 오디오 요소를 배열로 관리
+const audioElements = [chatSound, joinSound, leaveSound, specialSound];
+let hasUserInteracted = false; // 사용자의 첫 상호작용 여부 추적
 
 // --- UI 요소 가져오기 ---
 const toastPopup = document.getElementById('toast-popup');
@@ -35,10 +39,9 @@ const profilePreview = document.getElementById('profile-preview');
 const nicknameGroup = document.getElementById('nickname-group');
 const nicknameInput = document.getElementById('nickname-input');
 const chatWrapper = document.getElementById('chat-wrapper');
-const chatTitle = document.querySelector('#chat-header h3'); // [추가됨] 채팅방 제목 요소
 const copyCodeBtn = document.getElementById('copy-code-btn');
 const managePlayersBtn = document.getElementById('manage-players-btn');
-const toggleSoundBtn = document.getElementById('toggle-sound-btn'); // 사운드 버튼
+const toggleSoundBtn = document.getElementById('toggle-sound-btn');
 const form = document.getElementById('form');
 const input = document.getElementById('input');
 const messages = document.getElementById('messages');
@@ -58,16 +61,39 @@ const guessGroupModal = document.getElementById('guess-group-modal');
 const guessGroupTargetInfo = document.getElementById('guess-group-target-info');
 const guessGroupBtns = document.querySelectorAll('.guess-group-btn');
 const guessGroupModalClose = document.getElementById('guess-group-modal-close');
-let guessGroupTargetUser = null; // 팬덤 맞추기 대상 유저 임시 저장
+let guessGroupTargetUser = null;
 
 // --- 헬퍼 함수 ---
 function playSound(audioElement) {
-    if (!isSoundEnabled || !audioElement) return;
+    // [수정됨] 사용자가 상호작용했는지, 소리가 켜져 있는지 확인
+    if (!isSoundEnabled || !audioElement || !hasUserInteracted) return;
     audioElement.currentTime = 0;
     audioElement.play().catch(error => {
-        console.warn("오디오 재생에 실패했습니다. 사용자의 상호작용이 필요할 수 있습니다.", error);
+        // 이 에러는 이제 거의 발생하지 않아야 함
+        console.warn("오디오 재생에 실패했습니다.", error);
     });
 }
+
+// [추가됨] 사용자의 첫 상호작용 시 모든 오디오를 활성화하는 함수
+function unlockAudio() {
+    if (hasUserInteracted) return;
+    console.log('Unlocking audio...');
+    audioElements.forEach(audio => {
+        audio.load(); // 오디오 로드
+        // 음소거 상태로 재생 후 즉시 일시정지 (브라우저 정책 우회 트릭)
+        const promise = audio.play();
+        if(promise !== undefined) {
+             promise.then(_ => {
+                audio.pause();
+                audio.currentTime = 0;
+             }).catch(error => {
+                console.error("Audio unlock failed for element:", audio.id, error);
+             });
+        }
+    });
+    hasUserInteracted = true;
+}
+
 
 function updateSoundButtonUI() {
     if (isSoundEnabled) {
@@ -96,7 +122,7 @@ function updateUiForOwner() {
 }
 
 function updateProfileSetupUI() {
-    if (!gameConfig) return; // 설정 파일 로드 전에는 실행 방지
+    if (!gameConfig) return;
 
     const role = document.querySelector('input[name="role"]:checked').value;
     if (role === 'streamer') {
@@ -140,7 +166,6 @@ function updateFanTiers() {
 
     let tiers = streamer.fandom.tiers;
 
-    // "팬덤 맞추기" 모드에서는 슈퍼팬 티어 제외
     if (currentMode === 'guess_group') {
         tiers = tiers.filter(tier => !tier.isSuperFan);
     }
@@ -197,7 +222,10 @@ fanGroupSelect.addEventListener('change', () => {
     updateProfilePreview();
 });
 
+// [수정됨] "입장하기" 버튼 클릭 시 오디오 활성화
 confirmProfileBtn.addEventListener('click', () => {
+    unlockAudio(); // 오디오 활성화!
+
     const nickname = nicknameInput.value.trim();
     if (!nickname) return alert('닉네임을 입력해주세요!');
     const role = document.querySelector('input[name="role"]:checked').value;
@@ -279,19 +307,13 @@ socket.on('room mode response', ({ mode }) => {
     updateProfileSetupUI();
 });
 
-// [수정됨] 방 입장/생성 시 제목 변경 로직 추가
 function onRoomJoined(data) {
     const { roomId, users, ownerId, mode } = data;
     currentRoomId = roomId;
     currentOwnerId = ownerId;
     currentMode = mode; 
     messages.innerHTML = '';
-    
-    // 모드에 따라 제목 설정
-    const modeName = mode === 'superfan' ? '🕵️‍♂️ 슈퍼팬 찾기' : '👻 팬덤 맞추기';
-    chatTitle.textContent = modeName;
-    
-    addSystemMessage(null, `채팅방에 오신 것을 환영합니다!`);
+    addSystemMessage(null, `채팅방에 오신 것을 환영합니다! (모드: ${mode === 'superfan' ? '슈퍼팬 찾기' : '팬덤 맞추기'})`);
     updateUserList(users);
     updateUiForOwner();
     showChatRoom();
@@ -366,7 +388,9 @@ socket.on('chat message', (data) => {
     messages.appendChild(item);
     messages.scrollTop = messages.scrollHeight;
     
-    playSound(chatSound);
+    if (user.id !== socket.id) {
+        playSound(chatSound);
+    }
 });
 
 socket.on('identity revealed', (data) => {
@@ -524,10 +548,8 @@ function addGameMessage(htmlContent, type, pfpData = null) {
 function initialize() {
     if (!gameConfig) return;
 
-    // 사운드 버튼 초기 UI 설정
     updateSoundButtonUI();
 
-    // 스트리머 선택 메뉴 채우기
     streamerSelect.innerHTML = '';
     gameConfig.streamers.forEach(streamer => {
         const option = document.createElement('option');
@@ -536,7 +558,6 @@ function initialize() {
         streamerSelect.appendChild(option);
     });
 
-    // 팬덤 그룹 선택 메뉴 채우기
     fanGroupSelect.innerHTML = '';
     gameConfig.streamers.forEach(streamer => {
         const option = document.createElement('option');
@@ -545,7 +566,6 @@ function initialize() {
         fanGroupSelect.appendChild(option);
     });
 
-    // 팬덤 맞추기 모달 버튼 설정
     guessGroupBtns.forEach(btn => {
         const groupId = btn.dataset.group;
         const streamer = gameConfig.streamers.find(s => s.fandom.id === groupId);
