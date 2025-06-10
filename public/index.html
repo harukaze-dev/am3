@@ -8,16 +8,12 @@
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&display=swap" rel="stylesheet">
 </head>
 <body>
-    <!-- 복사 완료 팝업(토스트) -->
     <div id="toast-popup" class="hidden">코드 복사 완료!</div>
-
-    <!-- 메인 메뉴 섹션 -->
     <div id="main-menu">
         <div class="lobby-header">
             <h1>채팅에 참여하세요</h1>
             <p>모드를 선택하고 새로운 방을 만들거나 코드로 참여하세요.</p>
         </div>
-
         <div class="form-group mode-selection">
             <p class="form-label">게임 모드 선택</p>
             <div class="role-selection">
@@ -27,7 +23,6 @@
                  <label for="mode-guess-group" class="role-label">👻 팬덤 맞추기</label>
             </div>
         </div>
-        
         <button id="create-room-btn" class="main-menu-btn">새로운 방 만들기</button>
         <div class="divider">또는</div>
         <div id="join-form">
@@ -35,8 +30,6 @@
             <button id="join-room-btn">코드로 참여하기</button>
         </div>
     </div>
-
-    <!-- 프로필 설정 섹션 -->
     <div id="profile-setup" class="hidden">
         <div class="lobby-header">
             <h1 id="profile-setup-title">프로필 설정</h1>
@@ -64,40 +57,35 @@
         <button id="confirm-profile-btn">입장하기</button>
     </div>
 
-    <!-- 채팅방 섹션 -->
-    <div id="chat-wrapper" class="hidden">
-        <div id="chat-header">
-            <button id="manage-players-btn" class="header-btn hidden">👥 플레이어 관리</button>
-            <button id="toggle-sound-btn" class="header-btn">🔊</button>
-            <h3>채팅방</h3>
-            <button id="copy-code-btn" class="header-btn">📋 코드 복사</button>
+    <!-- [수정됨] 채팅방과 나가기 버튼을 감싸는 컨테이너 추가 -->
+    <div id="chat-container" class="hidden">
+        <div id="chat-wrapper">
+            <div id="chat-header">
+                <button id="manage-players-btn" class="header-btn hidden">👥 플레이어 관리</button>
+                <h3 id="chat-room-title">채팅방</h3>
+                <button id="copy-code-btn" class="header-btn">📋 코드 복사</button>
+            </div>
+            <ul id="messages"></ul>
+            <form id="form" action="">
+                <button type="button" id="action-btn" class="hidden"></button>
+                <input id="input" autocomplete="off" placeholder="메시지를 입력하세요..." /><button type="submit">전송</button>
+            </form>
         </div>
-        <ul id="messages"></ul>
-        <form id="form" action="">
-            <button type="button" id="action-btn" class="hidden"></button>
-            <input id="input" autocomplete="off" placeholder="메시지를 입력하세요..." /><button type="submit">전송</button>
-        </form>
+        <button id="leave-room-btn">🚪 방 나가기</button>
     </div>
 
-    <!-- 플레이어 선택 모달 (두 모드 공용) -->
     <div id="guess-modal" class="modal-overlay hidden">
         <div class="modal-content">
             <h2>누구의 정체를 맞추시겠습니까?</h2>
             <p>카드를 클릭하여 대상을 선택하세요.</p>
-            <div id="fan-card-container">
-                <!-- 팬 카드가 여기에 동적으로 추가됩니다 -->
-            </div>
+            <div id="fan-card-container"></div>
             <button id="guess-modal-close">닫기</button>
         </div>
     </div>
-    
-    <!-- "팬덤 맞추기" 최종 추리 모달 -->
     <div id="guess-group-modal" class="modal-overlay hidden">
         <div class="modal-content">
             <h2>어느 팬덤 소속일까요?</h2>
-            <div id="guess-group-target-info">
-                <!-- 타겟 유저 정보가 여기에 표시됩니다 -->
-            </div>
+            <div id="guess-group-target-info"></div>
             <p>아래에서 정답이라고 생각하는 팬덤을 선택하세요.</p>
             <div class="modal-buttons">
                 <button class="guess-group-btn" data-group="yeonbab">
@@ -116,37 +104,23 @@
             <button id="guess-group-modal-close">닫기</button>
         </div>
     </div>
-
-    <!-- 정체 공개 확인 모달 -->
-    <div id="reveal-confirm-modal" class="modal-overlay hidden">
-      <div class="modal-content">
-          <h2>정체 공개</h2>
-          <p>정말 당신의 정체를 모두에게 공개하시겠습니까?</p>
-          <div class="modal-buttons">
-              <button id="reveal-confirm-btn">공개하기</button>
-              <button id="reveal-cancel-btn">취소</button>
-          </div>
-      </div>
+    <div id="guess-role-modal" class="modal-overlay hidden">
+        <div class="modal-content">
+            <h2>이 분의 정체는 무엇일까요?</h2>
+            <div id="guess-role-target-info"></div>
+            <p>아래에서 정답이라고 생각하는 역할을 선택하세요.</p>
+            <div id="guess-role-options-container" class="modal-buttons"></div>
+            <button id="guess-role-modal-close">닫기</button>
+        </div>
     </div>
-
-    <!-- 플레이어 관리 모달 -->
     <div id="manage-players-modal" class="modal-overlay hidden">
         <div class="modal-content">
             <h2>플레이어 관리</h2>
             <p>플레이어를 클릭하여 내보낼 수 있습니다.</p>
-            <div id="player-list-container">
-                <!-- 플레이어 목록이 여기에 동적으로 추가됩니다 -->
-            </div>
+            <div id="player-list-container"></div>
             <button id="manage-players-modal-close">닫기</button>
         </div>
     </div>
-
-    <!-- [추가됨] 사운드 파일 로딩 -->
-    <audio id="chat-sound" src="/sounds/chat.mp3" preload="auto"></audio>
-    <audio id="join-sound" src="/sounds/join.mp3" preload="auto"></audio>
-    <audio id="leave-sound" src="/sounds/leave.mp3" preload="auto"></audio>
-    <audio id="special-sound" src="/sounds/special.mp3" preload="auto"></audio>
-
     <script src="/socket.io/socket.io.js"></script>
     <script src="/client.js"></script>
 </body>

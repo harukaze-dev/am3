@@ -9,9 +9,11 @@
                 "name": "연밥",
                 "pfp": "/images/fan_yeonbab.png",
                 "superFanPfp": "/images/fan_super_yeonbab.png",
+                "yasikPfp": "/images/am3.png",
                 "tiers": [
-                    { "name": "연밥", "isSuperFan": false },
-                    { "name": "개쩌는 연밥", "isSuperFan": true }
+                    { "name": "연밥", "isSuperFan": false, "isYasik": false },
+                    { "name": "개쩌는 연밥", "isSuperFan": true, "isYasik": false },
+                    { "name": "야식이", "isSuperFan": false, "isYasik": true }
                 ]
             }
         },
@@ -24,9 +26,11 @@
                 "name": "코랄단",
                 "pfp": "/images/fan_coral.png",
                 "superFanPfp": "/images/fan_super_coral.png",
+                "yasikPfp": "/images/am3.png",
                 "tiers": [
-                    { "name": "코랄단", "isSuperFan": false },
-                    { "name": "코랄기사단", "isSuperFan": true }
+                    { "name": "코랄단", "isSuperFan": false, "isYasik": false },
+                    { "name": "코랄기사단", "isSuperFan": true, "isYasik": false },
+                    { "name": "야식이", "isSuperFan": false, "isYasik": true }
                 ]
             }
         },
@@ -39,9 +43,11 @@
                 "name": "디그단",
                 "pfp": "/images/fan_digdan.png",
                 "superFanPfp": "/images/fan_super_digdan.png",
+                "yasikPfp": "/images/am3.png",
                 "tiers": [
-                    { "name": "디그단", "isSuperFan": false },
-                    { "name": "디그디그디그단", "isSuperFan": true }
+                    { "name": "디그단", "isSuperFan": false, "isYasik": false },
+                    { "name": "디그디그디그단", "isSuperFan": true, "isYasik": false },
+                    { "name": "야식이", "isSuperFan": false, "isYasik": true }
                 ]
             }
         }
