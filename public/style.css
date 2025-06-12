@@ -15,7 +15,7 @@
 body {
   margin: 0; font-family: 'Noto Sans KR', sans-serif;
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  color: var(--text-dark); display: flex; justify-content: center;
+  color: var(--text-dark); display: flex; justify-content: flex-start;
   align-items: center; min-height: 100vh; padding: 1rem;
   box-sizing: border-box; overflow-x: hidden;
 }
@@ -36,6 +36,7 @@ body.in-chat { align-items: flex-start; padding-top: 5vh; }
     background: white; padding: 2rem 2.5rem; border-radius: 16px;
     box-shadow: 0 10px 25px rgba(0,0,0,0.1), 0 5px 10px rgba(0,0,0,0.05);
     width: 100%; max-width: 420px; text-align: center; transition: all 0.3s ease;
+    margin: 0 auto;
 }
 .lobby-header { margin-bottom: 2rem; }
 .lobby-header h1 { font-size: 2rem; font-weight: 700; margin: 0 0 0.5rem 0; color: var(--text-dark); }
@@ -66,45 +67,92 @@ select:focus, #nickname-input:focus { outline: none; border-color: var(--primary
 #profile-preview:hover { transform: scale(1.05); }
 
 /* --- 채팅방 스타일 --- */
-/* [수정] #chat-container를 flex 컨테이너로 변경하여 채팅창과 나가기 버튼을 정렬합니다. */
-#chat-container {
-    width: 100%;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 1.5rem; /* 채팅창과 버튼 사이의 간격 */
-    transform: translateX(-15vw); /* 채팅창과 버튼 그룹 전체를 왼쪽으로 이동 */
-    transition: transform 0.5s ease-out, opacity 0.5s ease-out;
+#chat-container { display: flex; flex-direction: column; gap: 1.5rem; width: 100%; }
+#chat-container.single-view-active { max-width: 800px; margin-left: 10%; }
+#chat-container.multi-view-active { max-width: 1600px; margin: 0 auto; }
+#multi-chat-view { display: flex; width: 100%; gap: 1.5rem; height: 85vh; }
+.chat-column {
+    flex: 1; display: flex; flex-direction: column; background-color: #40444b;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.2); border-radius: 10px; overflow: hidden;
 }
-/* [수정] #chat-wrapper에서 transform과 transition 속성을 부모인 #chat-container로 이동시켰습니다. */
+.chat-column-header {
+    padding: 0.5rem 1rem; background-color: #36393f; color: white;
+    display: flex; align-items: center; justify-content: space-between;
+    border-bottom: 1px solid #2f3136; font-weight: 700;
+}
+.column-title { display: flex; align-items: center; gap: 0.75rem; }
+.column-title img { width: 32px; height: 32px; border-radius: 50%; border: 2px solid white; }
+.chat-column-header.streamer-yeonri .column-copy-code-btn { background-color: var(--yeonri-color); }
+.chat-column-header.streamer-morara .column-copy-code-btn { background-color: var(--morara-color); }
+.chat-column-header.streamer-haeblin .column-copy-code-btn { background-color: var(--haeblin-color); }
+
+.chat-form {
+    background: #ffffff; padding: 0.75rem; display: flex;
+    box-sizing: border-box; border-top: 1px solid #e0e0e0;
+    gap: 0.75rem; align-items: center;
+}
+.chat-form input {
+    border: none; padding: 0.6rem 1rem; flex-grow: 1; border-radius: 2rem;
+    background-color: #f0f2f5; font-size: 0.95rem; color: #111111;
+}
+.chat-form input:focus { outline: none; box-shadow: 0 0 0 2px var(--primary-color); }
+.chat-form button {
+    border: none; border-radius: 50%; width: 38px; height: 38px; color: #fff;
+    cursor: pointer; font-weight: 700; transition: background-color 0.2s, opacity 0.2s;
+    background: var(--primary-color); flex-shrink: 0;
+}
+.chat-form button:hover { opacity: 0.85; }
+
+#single-chat-view { width: 100%; }
 #chat-wrapper {
-    width: 100%;
-    max-width: 800px;
-    height: 85vh;
-    display: flex;
-    flex-direction: column;
-    background-color: #40444b;
-    box-shadow: 0 4px 20px rgba(0,0,0,0.2);
-    border-radius: 10px;
-    overflow: hidden;
-    margin: 0 auto; /* 중앙 정렬을 위해 추가 */
+    width: 100%; height: 85vh; display: flex; flex-direction: column;
+    background-color: #40444b; box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+    border-radius: 10px; overflow: hidden;
 }
-#chat-header { padding: 0.75rem 1rem; background-color: #36393f; color: white; display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; gap: 1rem; border-bottom: 1px solid #2f3136; }
+#chat-header {
+    padding: 0.75rem 1rem; background-color: #36393f; color: white;
+    display: grid; grid-template-columns: 1fr auto 1fr; align-items: center;
+    gap: 1rem; border-bottom: 1px solid #2f3136; flex-shrink: 0;
+}
 #chat-header h3 { margin: 0; text-align: center; grid-column: 2 / 3; }
 #chat-header > button:first-of-type { justify-self: start; }
 #chat-header > button:last-of-type { justify-self: end; }
-.header-btn { background-color: #2f3136; color: #dcddde; border: 1px solid #4f545c; border-radius: 5px; padding: 0.4rem 0.8rem; cursor: pointer; font-size: 0.9rem; font-weight: 500; transition: all 0.2s; }
+.header-btn {
+    background-color: #2f3136; color: #dcddde; border: 1px solid #4f545c;
+    border-radius: 5px; padding: 0.4rem 0.8rem; cursor: pointer;
+    font-size: 0.9rem; font-weight: 500; transition: all 0.2s;
+}
 .header-btn:hover { background-color: #4f545c; }
-#messages { list-style-type: none; margin: 0; padding: 1.5rem; overflow-y: auto; flex-grow: 1; }
-.message-item { display: flex; align-items: center; margin-bottom: 1.25rem; max-width: 75%; gap: 16px; }
+#form {
+    background: #ffffff; padding: 0.75rem; display: flex;
+    box-sizing: border-box; border-top: 1px solid #e0e0e0;
+    gap: 0.75rem; align-items: center; flex-shrink: 0;
+}
+
+/* 
+  [수정됨] 이 부분이 팬덤 맞추기 모드의 스크롤 및 레이아웃 오류를 해결하는 핵심입니다.
+  flex-grow: 1 (남는 공간을 모두 차지)과 min-height: 0 (콘텐츠 크기보다 작아질 수 있음)을 함께 사용하여
+  메시지 목록이 할당된 공간을 초과하지 않고, 내용이 넘칠 때만 내부 스크롤이 생기도록 만듭니다.
+*/
+.messages {
+    list-style-type: none;
+    margin: 0;
+    padding: 1.5rem;
+    overflow-y: auto;
+    flex-grow: 1;
+    min-height: 0;
+}
+.message-item { display: flex; align-items: center; margin-bottom: 1.25rem; max-width: 90%; gap: 12px; }
 .streamer-message { margin-left: auto; flex-direction: row-reverse; }
 .sender-info { display: flex; flex-direction: column; align-items: center; flex-shrink: 0; }
-.chat-pfp { width: 68px; height: 68px; border-radius: 50%; object-fit: cover; background-color: white; border: 1px solid #cccccc; padding: 2px; box-sizing: border-box; }
-.chat-nickname { font-size: 0.9em; margin-top: 6px; padding: 3px 8px; border-radius: 5px; max-width: 80px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; transition: background-color 0.2s, color 0.2s; border: 1px solid #999; background-color: #cccccc; color: #111111; }
+.chat-pfp { width: 50px; height: 50px; border-radius: 50%; object-fit: cover; background-color: white; border: 1px solid #cccccc; padding: 2px; box-sizing: border-box; }
+.chat-pfp.clickable { cursor: pointer; transition: transform 0.2s, box-shadow 0.2s; }
+.chat-pfp.clickable:hover { transform: scale(1.1); box-shadow: 0 0 10px var(--primary-color); }
+.chat-nickname { font-size: 0.85em; margin-top: 6px; padding: 3px 8px; border-radius: 5px; max-width: 80px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; transition: background-color 0.2s, color 0.2s; border: 1px solid #999; background-color: #cccccc; color: #111111; }
 .streamer-haeblin .chat-nickname, .fan-group-digdan .chat-nickname { background-color: var(--haeblin-color); color: white; border-color: var(--haeblin-color); }
 .streamer-yeonri .chat-nickname, .fan-group-yeonbab .chat-nickname { background-color: var(--yeonri-color); color: white; border-color: var(--yeonri-color); }
 .streamer-morara .chat-nickname, .fan-group-coral .chat-nickname { background-color: var(--morara-color); color: white; border-color: var(--morara-color); }
-.message-bubble { position: relative; border-radius: 14px; padding: 14px 20px; background: linear-gradient(to bottom, #e4e6eb, #f0f2f5); box-shadow: 0 0 0 4px white, 0 1px 2px rgba(0, 0, 0, 0.15); }
+.message-bubble { position: relative; border-radius: 14px; padding: 12px 18px; background: linear-gradient(to bottom, #e4e6eb, #f0f2f5); box-shadow: 0 0 0 4px white, 0 1px 2px rgba(0, 0, 0, 0.15); }
 .chat-message-text { margin: 0; font-size: 1em; line-height: 1.45; word-wrap: break-word; color: #333; }
 .streamer-message .chat-message-text { color: #ffffff; text-shadow: 0px 1px 2px rgba(0, 0, 0, 0.6); }
 .message-bubble::before { content: ""; position: absolute; top: 50%; transform: translateY(-50%); width: 0; height: 0; border-style: solid; }
@@ -126,7 +174,6 @@ select:focus, #nickname-input:focus { outline: none; border-color: var(--primary
 .game-message strong { font-weight: 900; color: #ffeb3b; }
 .game-message span { font-style: italic; color: #c7d2fe; }
 .game-message-pfp { display: block; width: 120px; height: 120px; border-radius: 50%; margin: 1rem auto 0; border: 4px solid rgba(255, 255, 255, 0.7); box-shadow: 0 4px 15px rgba(0,0,0,0.3); object-fit: cover; }
-#form { background: #ffffff; padding: 0.75rem; display: flex; box-sizing: border-box; border-top: 1px solid #e0e0e0; gap: 0.75rem; align-items: center; }
 #input { border: none; padding: 0.75rem 1.25rem; flex-grow: 1; border-radius: 2rem; background-color: #f0f2f5; font-size: 1rem; color: #111111; }
 #input:focus { outline: none; box-shadow: 0 0 0 2px var(--primary-color); }
 #form button { border: none; border-radius: 2rem; color: #fff; cursor: pointer; font-weight: 700; transition: background-color 0.2s, opacity 0.2s; padding: 0.6rem 1.2rem; white-space: nowrap; }
@@ -142,12 +189,12 @@ select:focus, #nickname-input:focus { outline: none; border-color: var(--primary
 .modal-content h2 { margin-top: 0; }
 .modal-content > p { margin-top: 0.5rem; margin-bottom: 1.5rem; color: #b9bbbe; }
 .modal-buttons { display: flex; justify-content: center; gap: 1rem; margin-top: 1.5rem; }
-.modal-buttons button, #guess-modal-close, #manage-players-modal-close, #guess-group-modal-close, #guess-role-modal-close { padding: 0.6rem 1.5rem; border: none; border-radius: 5px; cursor: pointer; font-weight: 700; transition: opacity 0.2s; }
-.modal-buttons button:hover, #guess-modal-close:hover, #manage-players-modal-close:hover, #guess-group-modal-close:hover, #guess-role-modal-close:hover { opacity: 0.8; }
-#guess-modal-close, #manage-players-modal-close, #guess-group-modal-close, #guess-role-modal-close { background-color: var(--primary-color); color: white; }
-#guess-group-target-info, #guess-role-target-info { display: flex; flex-direction: column; align-items: center; gap: 0.75rem; margin-bottom: 1.5rem; padding-bottom: 1.5rem; border-bottom: 1px solid #4f545c; }
-#guess-group-target-info .player-pfp, #guess-role-target-info .player-pfp { width: 80px; height: 80px; border-radius: 50%; object-fit: cover; }
-#guess-group-target-info .player-name, #guess-role-target-info .player-name { font-size: 1.2rem; }
+.modal-buttons button, #guess-modal-close, #manage-players-modal-close, #guess-group-modal-close { padding: 0.6rem 1.5rem; border: none; border-radius: 5px; cursor: pointer; font-weight: 700; transition: opacity 0.2s; }
+.modal-buttons button:hover, #guess-modal-close:hover, #manage-players-modal-close:hover, #guess-group-modal-close:hover { opacity: 0.8; }
+#guess-modal-close, #manage-players-modal-close, #guess-group-modal-close { background-color: var(--primary-color); color: white; }
+#guess-group-target-info { display: flex; flex-direction: column; align-items: center; gap: 0.75rem; margin-bottom: 1.5rem; padding-bottom: 1.5rem; border-bottom: 1px solid #4f545c; }
+#guess-group-target-info .player-pfp { width: 80px; height: 80px; border-radius: 50%; object-fit: cover; }
+#guess-group-target-info .player-name { font-size: 1.2rem; }
 .guess-group-btn, .guess-role-btn { display: flex; align-items: center; gap: 0.75rem; padding: 1rem; flex-grow: 1; background-color: #40444b; border: 2px solid #4f545c; border-radius: 8px; cursor: pointer; font-weight: 700; font-size: 1rem; color: white; transition: transform 0.2s, box-shadow 0.2s, border-color 0.2s; }
 .guess-group-btn, .guess-role-btn.with-pfp { flex-direction: column; }
 .guess-group-btn:hover, .guess-role-btn:hover { transform: translateY(-3px); box-shadow: 0 4px 10px rgba(0,0,0,0.2); }
@@ -167,38 +214,39 @@ select:focus, #nickname-input:focus { outline: none; border-color: var(--primary
 .player-name { flex-grow: 1; font-weight: 500; text-align: left; }
 .kick-btn { background-color: var(--kick-color); color: white; border: none; border-radius: 5px; padding: 0.4rem 0.8rem; cursor: pointer; font-weight: 700; transition: background-color 0.2s; }
 .kick-btn:hover { background-color: var(--kick-hover); }
-/* [수정] margin-top을 제거하고 부모 요소(#chat-container)의 gap으로 간격을 조절합니다. */
+#common-controls { display: flex; justify-content: center; }
 #leave-room-btn {
-    padding: 0.75rem 2rem;
-    background-color: rgba(255, 255, 255, 0.2);
-    color: white;
-    border: 1px solid rgba(255, 255, 255, 0.5);
-    border-radius: 50px;
-    cursor: pointer;
-    font-weight: 700;
-    font-size: 1rem;
-    transition: all 0.2s ease;
+    padding: 0.75rem 2rem; background-color: rgba(255, 255, 255, 0.2); color: white;
+    border: 1px solid rgba(255, 255, 255, 0.5); border-radius: 50px; cursor: pointer;
+    font-weight: 700; font-size: 1rem; transition: all 0.2s ease;
 }
-#leave-room-btn:hover {
-    background-color: rgba(255, 255, 255, 0.3);
-    transform: translateY(-2px);
+#leave-room-btn:hover { background-color: rgba(255, 255, 255, 0.3); transform: translateY(-2px); }
+
+.private-guess-content {
+    position: relative; background-color: #36393f; color: #dcddde;
+    padding: 2rem; border-radius: 10px; width: 90%; max-width: 1000px;
+    display: flex; gap: 1.5rem; height: 80vh;
 }
-#messages, #fan-card-container, #player-list-container {
-    scrollbar-width: thin;
-    scrollbar-color: #6c757d #2f3136;
+.private-guess-left { width: 300px; flex-shrink: 0; display: flex; flex-direction: column; gap: 1.5rem; }
+.private-guess-right { flex-grow: 1; display: flex; flex-direction: column; background-color: #2f3136; border-radius: 8px; overflow: hidden; }
+.private-guess-left h3, .private-guess-right h3 { margin: 0; padding-bottom: 1rem; border-bottom: 1px solid #4f545c; text-align: center;}
+#private-guess-target-info { display: flex; flex-direction: column; align-items: center; gap: 1rem; }
+#private-guess-target-info .player-pfp { width: 100px; height: 100px; border-radius: 50%; }
+#private-guess-target-info .player-name { font-size: 1.3rem; font-weight: 700; }
+#private-guess-options-container { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+#private-guess-admin-controls { margin-top: auto; padding-top: 1.5rem; border-top: 1px solid #4f545c; }
+#private-kick-btn { width: 100%; }
+#private-chat-log { padding: 1rem; }
+.modal-close-btn {
+    position: absolute; top: 1rem; right: 1rem;
+    background: none; border: none; color: #b9bbbe;
+    font-size: 2rem; line-height: 1; cursor: pointer; transition: color 0.2s;
 }
-#messages::-webkit-scrollbar, #fan-card-container::-webkit-scrollbar, #player-list-container::-webkit-scrollbar {
-    width: 8px;
+.modal-close-btn:hover { color: white; }
+
+.messages::-webkit-scrollbar, #fan-card-container::-webkit-scrollbar, #player-list-container::-webkit-scrollbar { width: 8px; }
+.messages::-webkit-scrollbar-track, #fan-card-container::-webkit-scrollbar-track, #player-list-container::-webkit-scrollbar-track { background: #2f3136; border-radius: 10px; }
+.messages::-webkit-scrollbar-thumb, #fan-card-container::-webkit-scrollbar-thumb, #player-list-container::-webkit-scrollbar-thumb {
+    background-color: #6c757d; border-radius: 10px; border: 2px solid #2f3136;
 }
-#messages::-webkit-scrollbar-track, #fan-card-container::-webkit-scrollbar-track, #player-list-container::-webkit-scrollbar-track {
-    background: #2f3136;
-    border-radius: 10px;
-}
-#messages::-webkit-scrollbar-thumb, #fan-card-container::-webkit-scrollbar-thumb, #player-list-container::-webkit-scrollbar-thumb {
-    background-color: #6c757d;
-    border-radius: 10px;
-    border: 2px solid #2f3136;
-}
-#messages::-webkit-scrollbar-thumb:hover, #fan-card-container::-webkit-scrollbar-thumb:hover, #player-list-container::-webkit-scrollbar-thumb:hover {
-    background-color: var(--primary-color);
-}
+.messages::-webkit-scrollbar-thumb:hover, #fan-card-container::-webkit-scrollbar-thumb:hover, #player-list-container::-webkit-scrollbar-thumb:hover { background-color: var(--primary-color); }

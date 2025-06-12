@@ -128,23 +128,24 @@ io.on('connection', (socket) => {
       }
   });
 
+  // [수정됨] 추측이 발생한 채널 ID(chatGroupId)를 받아, 결과도 해당 채널에만 전송하도록 수정
   socket.on('guess role', (data) => {
-    const { streamerName, targetUser, guessedRole, guessedTierName } = data;
+    const { streamerName, targetUser, guessedRole, guessedTierName, chatGroupId } = data;
     const room = rooms.get(socket.roomId);
     if (!room || !targetUser) return;
     const actualRole = getUserRole(targetUser);
+    const payload = {
+        success: false,
+        message: `❌ ${streamerName}님이 ${targetUser.nickname}님을 ${guessedTierName}(으)로 추측했지만, 아니었습니다!`,
+        chatGroupId: chatGroupId // 클라이언트로 다시 보낼 채널 ID
+    };
     if (actualRole === guessedRole) {
-        io.to(socket.roomId).emit('guess result', {
-            success: true,
-            message: `🎯 ${streamerName}님이 ${targetUser.nickname}님의 정체(<span>'${targetUser.fanTier}'</span>)를 맞혔습니다!`,
-            fanGroup: targetUser.fanGroup, fanTier: targetUser.fanTier
-        });
-    } else {
-        io.to(socket.roomId).emit('guess result', {
-            success: false,
-            message: `❌ ${streamerName}님이 ${targetUser.nickname}님을 ${guessedTierName}(으)로 추측했지만, 아니었습니다!`
-        });
+        payload.success = true;
+        payload.message = `🎯 ${streamerName}님이 ${targetUser.nickname}님의 정체(<span>'${targetUser.fanTier}'</span>)를 맞혔습니다!`;
+        payload.fanGroup = targetUser.fanGroup;
+        payload.fanTier = targetUser.fanTier;
     }
+    io.to(socket.roomId).emit('guess result', payload);
   });
 
   socket.on('kick player', (targetUserId) => {
@@ -193,9 +194,32 @@ io.on('connection', (socket) => {
     console.log(`A user disconnected: ${socket.id}`);
   });
 
-  socket.on('chat message', (msg) => {
-    if (socket.userData && socket.roomId) {
-      io.to(socket.roomId).emit('chat message', { user: socket.userData, message: msg });
+  // [수정됨] '가짜팬 찾기' 모드에서 채널별 채팅 권한 검사 로직 추가
+  socket.on('chat message', (data) => {
+    const { message, chatGroupId } = data;
+    const user = socket.userData;
+    const room = rooms.get(socket.roomId);
+    if (!user || !room || !message || !chatGroupId) return;
+
+    const roomMode = room.mode;
+    let canChat = false;
+
+    if (roomMode === 'fakefan') {
+        const streamerConfig = config.streamers.find(s => s.id === chatGroupId);
+        if (!streamerConfig) return;
+
+        // 해당 채널의 스트리머이거나, 해당 스트리머의 팬일 경우에만 채팅 가능
+        if ((user.role === 'streamer' && user.streamerId === chatGroupId) || 
+            (user.role === 'fan' && user.fanGroup === streamerConfig.fandom.id)) {
+            canChat = true;
+        }
+    } else {
+        // 다른 모드는 항상 채팅 가능
+        canChat = true;
+    }
+
+    if (canChat) {
+      io.to(socket.roomId).emit('chat message', { user: user, message: message, chatGroupId: chatGroupId });
     }
   });
 

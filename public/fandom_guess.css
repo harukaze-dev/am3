@@ -1,0 +1,141 @@
+/* --- 팬덤 맞추기 모드 전용 스타일 --- */
+#chat-container.single-view-active {
+    width: 60%;
+    margin: 0;
+    margin-left: 3.3%;
+}
+
+#single-chat-view {
+    width: 100%;
+}
+
+#chat-wrapper {
+    height: 95vh;
+    display: flex;
+    flex-direction: column;
+    background-color: #40444b;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+    border-radius: 10px;
+    overflow: hidden;
+}
+
+#chat-header {
+    padding: 0.75rem 1rem;
+    background-color: #36393f;
+    color: white;
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
+    align-items: center;
+    gap: 1rem;
+    border-bottom: 1px solid #2f3136;
+    flex-shrink: 0;
+}
+
+#chat-header h3 {
+    margin: 0;
+    text-align: center;
+    grid-column: 2 / 3;
+}
+
+#chat-header > button:first-of-type, #manage-players-btn { justify-self: start; }
+#chat-header > .settings-container { justify-self: end; }
+
+.header-btn {
+    background-color: #2f3136;
+    color: #dcddde;
+    border: 1px solid #4f545c;
+    border-radius: 5px;
+    padding: 0.4rem 0.8rem;
+    cursor: pointer;
+    font-size: 0.9rem;
+    font-weight: 500;
+    transition: all 0.2s;
+}
+.header-btn:hover { background-color: #4f545c; }
+
+/* [추가] '팬덤 맞추기' 모드의 설정 버튼 스타일 재정의 */
+#settings-btn {
+    background-color: white;
+    color: var(--text-dark);
+    border: 1px solid var(--border-color);
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+#settings-btn:hover {
+    background-color: var(--light-gray);
+}
+
+
+#form {
+    background: #ffffff;
+    padding: 0.75rem;
+    display: flex;
+    box-sizing: border-box;
+    border-top: 1px solid #e0e0e0;
+    gap: 0.75rem;
+    align-items: center;
+    flex-shrink: 0;
+}
+
+#input {
+    border: none;
+    padding: 0.75rem 1.25rem;
+    flex-grow: 1;
+    border-radius: 2rem;
+    background-color: #f0f2f5;
+    font-size: 1rem;
+    color: #111111;
+}
+
+#input:focus {
+    outline: none;
+    box-shadow: 0 0 0 2px var(--primary-color);
+}
+
+#form button {
+    border: none;
+    border-radius: 2rem;
+    color: #fff;
+    cursor: pointer;
+    font-weight: 700;
+    transition: background-color 0.2s, opacity 0.2s;
+    padding: 0.6rem 1.2rem;
+    white-space: nowrap;
+}
+
+#form button:hover { opacity: 0.85; }
+#form button[type="submit"] { background: var(--primary-color); }
+
+/* --- 팬덤 맞추기 모드용 모달 --- */
+.guess-group-content {
+    position: relative; background-color: #36393f; color: #dcddde;
+    padding: 2rem; border-radius: 10px; width: 90%; max-width: 800px;
+    display: flex; gap: 1.5rem; height: 70vh;
+}
+.guess-group-left { width: 300px; flex-shrink: 0; display: flex; flex-direction: column; gap: 1.5rem; }
+.guess-group-right { flex-grow: 1; display: flex; flex-direction: column; background-color: #2f3136; border-radius: 8px; overflow: hidden; }
+.guess-group-left h3, .guess-group-right h3 { margin: 0; padding-bottom: 1rem; border-bottom: 1px solid #4f545c; text-align: center;}
+
+#guess-group-target-info { display: flex; flex-direction: column; align-items: center; gap: 1rem; }
+#guess-group-target-info .player-pfp { width: 100px; height: 100px; border-radius: 50%; }
+#guess-group-target-info .player-name { font-size: 1.3rem; font-weight: 700; }
+.modal-buttons { display: flex; flex-direction: column; gap: 1rem; margin-top: 1.5rem; }
+.guess-group-btn { display: flex; align-items: center; gap: 0.75rem; padding: 1rem; flex-grow: 1; background-color: #40444b; border: 2px solid #4f545c; border-radius: 8px; cursor: pointer; font-weight: 700; font-size: 1rem; color: white; transition: transform 0.2s, box-shadow 0.2s, border-color 0.2s; }
+.guess-group-btn { flex-direction: row; justify-content: flex-start; }
+.guess-group-btn:hover { transform: translateY(-3px); box-shadow: 0 4px 10px rgba(0,0,0,0.2); }
+.guess-group-btn[data-group="yeonbab"]:hover { border-color: var(--yeonri-color); }
+.guess-group-btn[data-group="coral"]:hover { border-color: var(--morara-color); }
+.guess-group-btn[data-group="digdan"]:hover { border-color: var(--haeblin-color); }
+.guess-group-btn img { width: 40px; height: 40px; border-radius: 50%; object-fit: cover; }
+#guess-group-chat-log { padding: 1rem; }
+
+#fandom-guess-admin-controls {
+    margin-top: auto;
+    padding-top: 1.5rem;
+    border-top: 1px solid #4f545c;
+}
+#fandom-kick-btn {
+    width: 100%;
+}
