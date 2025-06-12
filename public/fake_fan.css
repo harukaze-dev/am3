@@ -22,7 +22,20 @@
     overflow: hidden;
     position: relative;
     height: 80vh;
+    transition: background-color 0.5s ease; 
 }
+
+.chat-column.revealed-yeonri { background-color: #f2eef7; }
+.chat-column.revealed-morara { background-color: #fdebee; }
+.chat-column.revealed-haeblin { background-color: #eff1f9; }
+
+.chat-column.revealed .messages { background-color: transparent; }
+.chat-column.revealed .message-bubble { background: white; box-shadow: 0 1px 2px rgba(0,0,0,0.1); }
+.chat-column.revealed .message-bubble .chat-message-text { color: #333; }
+.chat-column.revealed .streamer-message .message-bubble .chat-message-text { color: white; }
+.chat-column.revealed .system-text { color: #555; font-style: normal; }
+.chat-column.revealed .system-nickname { color: #111; }
+
 
 .column-resize-handle {
     position: absolute;
@@ -70,7 +83,6 @@
     border: 2px solid white;
 }
 
-/* [수정] '가짜팬 찾기' 모드의 설정 버튼 스타일 변경 */
 .column-settings-btn {
     background-color: white;
     color: var(--text-dark);
@@ -99,6 +111,26 @@
     flex-shrink: 0;
 }
 
+.end-round-btn {
+    padding: 0.6rem 1rem;
+    border: none;
+    border-radius: 2rem;
+    background-color: #28a745;
+    color: white;
+    font-weight: 700;
+    cursor: pointer;
+    transition: background-color 0.2s, filter 0.2s;
+    white-space: nowrap;
+}
+.end-round-btn:hover {
+    filter: brightness(1.1);
+}
+.end-round-btn:disabled {
+    background-color: #6c757d;
+    cursor: not-allowed;
+}
+
+
 .chat-form input {
     border: none;
     padding: 0.6rem 1rem;
@@ -114,7 +146,7 @@
     box-shadow: 0 0 0 2px var(--primary-color);
 }
 
-.chat-form button {
+.chat-form button[type="submit"] {
     border: none;
     border-radius: 50%;
     width: 38px;
@@ -122,11 +154,25 @@
     color: #fff;
     cursor: pointer;
     font-weight: 700;
-    transition: background-color 0.2s, opacity 0.2s;
+    transition: background-color 0.2s, filter 0.2s;
     background: var(--primary-color);
     flex-shrink: 0;
 }
-.chat-form button:hover { opacity: 0.85; }
+.chat-form button[type="submit"]:hover { filter: brightness(1.1); }
+
+.chat-column[data-streamer-id="yeonri"] .end-round-btn,
+.chat-column[data-streamer-id="yeonri"] .chat-form button[type="submit"] {
+    background-color: var(--yeonri-color);
+}
+.chat-column[data-streamer-id="morara"] .end-round-btn,
+.chat-column[data-streamer-id="morara"] .chat-form button[type="submit"] {
+    background-color: var(--morara-color);
+}
+.chat-column[data-streamer-id="haeblin"] .end-round-btn,
+.chat-column[data-streamer-id="haeblin"] .chat-form button[type="submit"] {
+    background-color: var(--haeblin-color);
+}
+
 
 /* --- 가짜팬 찾기 모드용 모달 --- */
 #channel-participants-list {
@@ -145,7 +191,46 @@
     padding: 1rem;
     border-radius: 8px;
     text-align: center;
+    position: relative;
+    display: flex; 
+    flex-direction: column; 
+    align-items: center;
+    justify-content: center;
 }
+.participant-card.guessed::after {
+    content: '✔';
+    position: absolute;
+    top: 5px;
+    right: 8px;
+    color: #28a745;
+    font-size: 1.5rem;
+    font-weight: bold;
+    text-shadow: 0 0 3px black;
+}
+
+.participant-role, .revealed-identity-tag {
+    font-size: 0.8rem;
+    font-weight: bold;
+    padding: 2px 6px;
+    border-radius: 4px;
+    color: white;
+    margin-bottom: 0.5rem;
+}
+
+.fandom-yeonbab .participant-role,
+#private-guess-target-info.fandom-yeonbab .revealed-identity-tag {
+    background-color: var(--yeonri-color);
+}
+.fandom-coral .participant-role,
+#private-guess-target-info.fandom-coral .revealed-identity-tag {
+    background-color: var(--morara-color);
+}
+.fandom-digdan .participant-role,
+#private-guess-target-info.fandom-digdan .revealed-identity-tag {
+    background-color: var(--haeblin-color);
+}
+
+
 .participant-card img {
     width: 60px;
     height: 60px;
@@ -184,14 +269,150 @@
     display: flex;
     flex-direction: column;
     gap: 1rem;
+    overflow-y: auto; 
 }
-.guess-role-btn { display: flex; align-items: center; gap: 0.75rem; padding: 1rem; flex-grow: 1; background-color: #40444b; border: 2px solid #4f545c; border-radius: 8px; cursor: pointer; font-weight: 700; font-size: 1rem; color: white; transition: transform 0.2s, box-shadow 0.2s, border-color 0.2s; }
+.guess-role-btn { display: flex; align-items: center; gap: 0.75rem; padding: 1rem; flex-grow: 1; background-color: #40444b; border: 2px solid #4f545c; border-radius: 8px; cursor: pointer; font-weight: 700; font-size: 1rem; color: white; transition: transform 0.2s, box-shadow 0.2s, border-color 0.2s, background-color 0.2s; }
 .guess-role-btn.with-pfp {
     flex-direction: row;
     justify-content: flex-start;
 }
 .guess-role-btn:hover { transform: translateY(-3px); box-shadow: 0 4px 10px rgba(0,0,0,0.2); border-color: var(--primary-color); }
+.guess-role-btn.selected {
+    border-color: #28a745;
+    background-color: #2f4b36;
+    box-shadow: 0 0 10px rgba(40, 167, 69, 0.5);
+}
+
 .guess-role-btn img { width: 40px; height: 40px; border-radius: 50%; object-fit: cover; }
 #private-guess-admin-controls { margin-top: auto; padding-top: 1.5rem; border-top: 1px solid #4f545c; }
 #private-kick-btn { width: 100%; }
 #private-chat-log { padding: 1rem; }
+
+
+.game-over-content {
+    background-color: #36393f;
+    color: #dcddde;
+    padding: 2rem 3rem;
+    border-radius: 12px;
+    width: 90%;
+    max-width: 1200px; 
+    max-height: 90vh;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+}
+.game-over-header {
+    margin-bottom: 1.5rem;
+}
+.game-over-header h1 {
+    font-size: 2.5rem;
+    color: #ffd700;
+    text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+    margin: 0;
+}
+
+#game-over-body {
+    display: grid;
+    grid-template-columns: 1fr 2fr; 
+    gap: 1.5rem;
+    overflow-y: auto;
+    flex-grow: 1;
+    grid-auto-rows: min-content; 
+}
+
+.ranking-item {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    background-color: #40444b;
+    padding: 1.5rem;
+    border-radius: 8px;
+    box-sizing: border-box;
+}
+.ranking-pfp {
+    width: 70px;
+    height: 70px;
+    border-radius: 50%;
+    border: 3px solid #5c5f66;
+    flex-shrink: 0;
+}
+.ranking-text-group {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    text-align: left;
+}
+.ranking-text-group .rank-and-name {
+    display: flex;
+    align-items: baseline;
+    gap: 0.75rem;
+}
+.ranking-item .rank {
+    font-weight: 900;
+    font-size: 2rem;
+    line-height: 1;
+}
+.ranking-item .rank-1 { color: #ffd700; }
+.ranking-item .rank-2 { color: #c0c0c0; }
+.ranking-item .rank-3 { color: #cd7f32; }
+.ranking-item .name { font-weight: 700; font-size: 1.4rem; }
+.ranking-item .round-info { font-size: 0.9rem; color: #b9bbbe; margin-top: 0.25rem; }
+
+
+.fandom-identity-group {
+    background-color: #2f3136;
+    border-radius: 8px;
+    padding: 1rem;
+    display: flex;
+    flex-wrap: wrap; 
+    gap: 0.75rem;
+    align-content: flex-start; 
+    box-sizing: border-box;
+}
+
+.identity-card {
+    background-color: #40444b;
+    padding: 0.75rem;
+    border-radius: 5px;
+    text-align: center;
+    width: 120px; 
+    flex-shrink: 0;
+}
+/* [수정] 카드 내부 요소들의 여백 조정 */
+.identity-card img {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    margin-bottom: 0.1rem; 
+    border: 2px solid white;
+}
+.identity-card .name { 
+    font-weight: 700; 
+    font-size: 0.95rem; 
+    margin: 0 0 0.1rem 0; /* 상단 여백 제거, 하단 여백 유지 */
+    display: block;
+}
+.identity-card .role {
+    font-size: 0.8rem;
+    color: white;
+    font-weight: bold;
+    padding: 3px 8px;
+    margin-bottom: 0.1rem; 
+    border-radius: 10px;
+    display: inline-block;
+}
+.identity-card.fandom-yeonbab .role { background-color: var(--yeonri-color); }
+.identity-card.fandom-coral .role { background-color: var(--morara-color); }
+.identity-card.fandom-digdan .role { background-color: var(--haeblin-color); }
+.identity-card .role.yasik { 
+    background-color: white;
+    color: #333;
+}
+
+
+#game-over-close-btn {
+    margin-top: 1.5rem;
+    width: auto;
+    align-self: center;
+    padding: 0.8rem 2.5rem;
+}

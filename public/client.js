@@ -9,6 +9,9 @@ let currentMode = null;
 let userIntent = null;
 let roomToJoin = null;
 let allUsers = [];
+let currentGuesses = {}; 
+let currentRoundNumber = 1; 
+let isGameOver = false; // [추가] 게임 종료 상태 플래그
 
 const gameModeNames = {
     fakefan: '👻 가짜팬 찾기',
@@ -33,7 +36,6 @@ const profilePreview = document.getElementById('profile-preview');
 const nicknameGroup = document.getElementById('nickname-group');
 const nicknameInput = document.getElementById('nickname-input');
 const chatContainer = document.getElementById('chat-container');
-// [삭제] leaveRoomBtn 변수 삭제
 const managePlayersModal = document.getElementById('manage-players-modal');
 const playerListContainer = document.getElementById('player-list-container');
 const managePlayersModalClose = document.getElementById('manage-players-modal-close');
@@ -42,7 +44,6 @@ const backToLobbyBtn = document.getElementById('back-to-lobby-btn');
 const singleChatView = document.getElementById('single-chat-view');
 const singleChatMessages = document.getElementById('messages');
 const singleChatInput = document.getElementById('input');
-// [삭제] copyCodeBtn 변수 삭제
 const managePlayersBtn = document.getElementById('manage-players-btn');
 const guessGroupModal = document.getElementById('guess-group-modal');
 const guessGroupTargetInfo = document.getElementById('guess-group-target-info');
@@ -67,6 +68,11 @@ const channelParticipantsTitle = document.getElementById('channel-participants-t
 const channelParticipantsList = document.getElementById('channel-participants-list');
 const channelParticipantsModalClose = document.getElementById('channel-participants-modal-close');
 
+const gameOverModal = document.getElementById('game-over-modal');
+const gameOverBody = document.getElementById('game-over-body');
+const gameOverCloseBtn = document.getElementById('game-over-close-btn');
+
+
 const modeStylesheet = document.getElementById('mode-stylesheet');
 let sortable = null;
 let resizingColumn = null;
@@ -76,29 +82,46 @@ function showToast(message) {
     toastPopup.classList.remove('hidden');
     setTimeout(() => { toastPopup.classList.add('hidden'); }, 2500);
 }
+
+function updateRoundEndButtons() {
+    document.querySelectorAll('.end-round-btn').forEach(btn => {
+        btn.textContent = `${currentRoundNumber}라운드 종료`;
+    });
+}
+
+// [추가] 게임 종료 후 버튼 텍스트/기능 변경을 위한 함수
+function updateEndRoundButtonsAfterGameOver() {
+    document.querySelectorAll('.end-round-btn').forEach(btn => {
+        btn.textContent = '결과 다시보기';
+    });
+}
+
+
 function updateColumnUIVisibility() {
     if (currentMode !== 'fakefan') return;
     const streamerIdToFandomId = new Map(gameConfig.streamers.map(s => [s.id, s.fandom.id]));
     document.querySelectorAll('.chat-column').forEach(column => {
         const columnStreamerId = column.dataset.streamerId;
         const form = column.querySelector('.chat-form');
-        // [수정] copyBtn 대신 settings-container를 선택하여 표시 여부 결정
         const settingsContainer = column.querySelector('.settings-container');
         const headerTitle = column.querySelector('.column-title');
-        let belongsToChannel = false;
-        if ((currentUserData.role === 'streamer' && currentUserData.streamerId === columnStreamerId) || socket.id === currentOwnerId) {
+        const endRoundBtn = form.querySelector('.end-round-btn');
+
+        let isMyChannel = currentUserData.role === 'streamer' && currentUserData.streamerId === columnStreamerId;
+
+        if (isMyChannel || socket.id === currentOwnerId) {
             headerTitle.style.cursor = 'pointer';
             headerTitle.onclick = () => openChannelParticipantsModal(columnStreamerId);
         } else {
             headerTitle.style.cursor = 'default';
             headerTitle.onclick = null;
         }
-        if ((currentUserData.role === 'streamer' && currentUserData.streamerId === columnStreamerId) || 
-            (currentUserData.role === 'fan' && currentUserData.fanGroup === streamerIdToFandomId.get(columnStreamerId))) {
-            belongsToChannel = true;
-        }
+
+        let belongsToChannel = (isMyChannel) || (currentUserData.role === 'fan' && currentUserData.fanGroup === streamerIdToFandomId.get(columnStreamerId));
+
         form.classList.toggle('hidden', !belongsToChannel);
-        // [수정] copyBtn 대신 settings-container의 표시 여부 결정
+        endRoundBtn.classList.toggle('hidden', !isMyChannel);
+
         if (settingsContainer) {
             settingsContainer.classList.toggle('hidden', !belongsToChannel);
         }
@@ -127,6 +150,31 @@ function updateProfileSetupUI() {
     }
     updateProfilePreview();
 }
+function getPfp(user) {
+    if (!gameConfig || !user) return '/images/ghost.png';
+
+    const streamer = gameConfig.streamers.find(s => s.fandom.id === user.fanGroup);
+    if (!streamer) return user.pfp; 
+
+    if (user.actualRole === 'yasik' || (user.isRevealed && getRole(user) === 'yasik')) {
+        return streamer.fandom.yasikPfp;
+    }
+    if (user.actualRole === 'superfan' || (user.isRevealed && getRole(user) === 'superfan')) {
+        return streamer.fandom.superFanPfp;
+    }
+    return streamer.fandom.pfp;
+}
+function getRole(user) {
+    if (!user || !user.fanTier) return 'fan';
+    const streamer = gameConfig.streamers.find(s => s.fandom.id === user.fanGroup);
+    if (!streamer) return 'fan';
+    const tierInfo = streamer.fandom.tiers.find(t => t.name === user.fanTier);
+    if (!tierInfo) return 'fan';
+    if (tierInfo.isYasik) return 'yasik';
+    if (tierInfo.isSuperFan) return 'superfan';
+    return 'fan';
+}
+
 function updateProfilePreview() {
     if (!gameConfig) return;
     const role = document.querySelector('input[name="role"]:checked').value;
@@ -170,35 +218,27 @@ function initializeResizeHandles() {
         });
     });
 }
-// [추가] 설정 메뉴 관련 이벤트 핸들러를 설정하는 함수
 function setupSettingsMenus() {
-    // 모든 설정 메뉴 숨기는 함수
     const hideAllSettingsMenus = () => {
         document.querySelectorAll('.settings-menu').forEach(menu => menu.classList.add('hidden'));
     };
-
-    // 설정 버튼 클릭 시 메뉴 토글
     document.querySelectorAll('.settings-container > button').forEach(button => {
         button.addEventListener('click', (e) => {
             e.stopPropagation();
             const menu = button.nextElementSibling;
             const isHidden = menu.classList.contains('hidden');
-            hideAllSettingsMenus(); // 다른 메뉴는 모두 닫고
+            hideAllSettingsMenus(); 
             if (isHidden) {
-                menu.classList.remove('hidden'); // 현재 메뉴만 열기
+                menu.classList.remove('hidden'); 
             }
         });
     });
-
-    // 메뉴의 '코드 복사' 버튼 기능
     document.querySelectorAll('.menu-copy-code-btn').forEach(btn => {
         btn.addEventListener('click', () => {
             if (currentRoomId) navigator.clipboard.writeText(currentRoomId).then(() => showToast('코드 복사 완료!'));
             hideAllSettingsMenus();
         });
     });
-    
-    // 메뉴의 '방 나가기' 버튼 기능
     document.querySelectorAll('.menu-leave-room-btn').forEach(btn => {
         btn.addEventListener('click', () => {
             if (confirm('정말로 방을 나가시겠습니까? 로비로 이동합니다.')) {
@@ -207,12 +247,8 @@ function setupSettingsMenus() {
             hideAllSettingsMenus();
         });
     });
-
-    // 문서의 다른 곳을 클릭하면 모든 메뉴를 닫음
     document.addEventListener('click', hideAllSettingsMenus);
 }
-
-
 function showChatRoom() {
     mainMenu.classList.add('hidden');
     profileSetup.classList.add('hidden');
@@ -225,6 +261,7 @@ function showChatRoom() {
         singleChatView.classList.add('hidden');
         multiChatView.classList.remove('hidden');
         updateColumnUIVisibility();
+        updateRoundEndButtons(); 
         if (sortable) sortable.destroy();
         sortable = Sortable.create(multiChatView, { animation: 150, handle: '.chat-column-header' });
         initializeResizeHandles();
@@ -235,7 +272,6 @@ function showChatRoom() {
         singleChatView.classList.remove('hidden');
         singleChatInput.focus();
     }
-    // [추가] 채팅방이 표시될 때 설정 메뉴 기능 활성화
     setupSettingsMenus();
 }
 createRoomBtn.addEventListener('click', () => {
@@ -287,13 +323,14 @@ backToLobbyBtn.addEventListener('click', () => {
     profileSetup.classList.add('hidden');
     mainMenu.classList.remove('hidden');
 });
-// [삭제] copyCodeBtn 관련 이벤트 리스너 삭제
 managePlayersBtn.addEventListener('click', () => managePlayersModal.classList.remove('hidden'));
 guessGroupModalClose.onclick = () => guessGroupModal.classList.add('hidden');
-// [삭제] column-copy-code-btn 관련 이벤트 리스너 삭제
 privateGuessModalClose.onclick = () => privateGuessModal.classList.add('hidden');
 channelParticipantsModalClose.onclick = () => channelParticipantsModal.classList.add('hidden');
 managePlayersModalClose.onclick = () => managePlayersModal.classList.add('hidden');
+gameOverCloseBtn.onclick = () => gameOverModal.classList.add('hidden');
+
+
 document.querySelectorAll('.chat-form, #form').forEach(form => {
     form.addEventListener('submit', (e) => {
         e.preventDefault();
@@ -306,7 +343,19 @@ document.querySelectorAll('.chat-form, #form').forEach(form => {
         }
     });
 });
-// [삭제] leaveRoomBtn 관련 이벤트 리스너 삭제
+// [수정] 라운드 종료 버튼 이벤트 리스너 로직 변경
+document.querySelectorAll('.end-round-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+        if (isGameOver) {
+            gameOverModal.classList.remove('hidden');
+        } else {
+            if (confirm('정말로 라운드를 종료하고 결과를 확인하시겠습니까?')) {
+                socket.emit('end round');
+            }
+        }
+    });
+});
+
 guessGroupBtns.forEach(btn => {
     btn.onclick = () => {
         if (guessGroupTargetUser) {
@@ -321,10 +370,9 @@ guessGroupBtns.forEach(btn => {
 });
 document.addEventListener('keydown', (e) => {
     if (e.key === 'Escape') {
-        [managePlayersModal, guessGroupModal, privateGuessModal, channelParticipantsModal].forEach(modal => {
+        [managePlayersModal, guessGroupModal, privateGuessModal, channelParticipantsModal, gameOverModal].forEach(modal => {
             if (!modal.classList.contains('hidden')) modal.classList.add('hidden');
         });
-        // [추가] ESC 키로 설정 메뉴도 닫기
         document.querySelectorAll('.settings-menu').forEach(menu => menu.classList.add('hidden'));
     }
 });
@@ -353,11 +401,12 @@ socket.on('room mode response', ({ mode }) => {
     updateProfileSetupUI();
 });
 function onRoomJoined(data) {
-    const { roomId, users, ownerId, mode } = data;
+    const { roomId, users, ownerId, mode, currentRound } = data; 
     currentRoomId = roomId;
     currentOwnerId = ownerId;
     currentMode = mode;
     allUsers = users;
+    currentRoundNumber = currentRound; 
     if (currentMode === 'fakefan') {
         document.querySelectorAll('#multi-chat-view .messages').forEach(ul => ul.innerHTML = '');
     } else {
@@ -371,6 +420,12 @@ function onRoomJoined(data) {
 }
 socket.on('room created', onRoomJoined);
 socket.on('join success', onRoomJoined);
+
+socket.on('round advanced', (newRound) => {
+    currentRoundNumber = newRound;
+    updateRoundEndButtons();
+});
+
 socket.on('user joined', (data) => {
     allUsers = data.users;
     updateUserList(data.users);
@@ -418,11 +473,23 @@ socket.on('chat message', (data) => {
         liClasses.push('streamer-message');
         if (user.streamerId) liClasses.push(`streamer-${user.streamerId}`);
     } else {
-        if (currentMode !== 'guess_group' && user.fanGroup) liClasses.push(`fan-group-${user.fanGroup}`);
+        if (currentMode !== 'guess_group' && user.fanGroup) {
+            const fanData = allUsers.find(u => u.id === user.id);
+            if (fanData?.isRevealed) {
+                liClasses.push(`fan-group-${user.fanGroup}`);
+            }
+        }
     }
     item.className = liClasses.join(' ');
+    
     let pfpSrc = user.pfp;
-    if (currentMode === 'guess_group' && user.role === 'fan') pfpSrc = '/images/ghost.png';
+    if (currentMode === 'guess_group' && user.role === 'fan') {
+        pfpSrc = '/images/ghost.png';
+    } else if (currentMode === 'fakefan' && user.role === 'fan') {
+        const fanData = allUsers.find(u => u.id === user.id);
+        pfpSrc = fanData?.isRevealed ? getPfp(fanData) : user.pfp;
+    }
+    
     item.innerHTML = `<div class="sender-info"><img src="${pfpSrc}" alt="pfp" class="chat-pfp"><span class="chat-nickname">${user.nickname}</span></div><div class="message-bubble"><p class="chat-message-text">${message}</p></div>`;
     const pfpElement = item.querySelector('.chat-pfp');
     if (currentUserData.role === 'streamer' && user.role === 'fan') {
@@ -441,22 +508,113 @@ socket.on('chat message', (data) => {
     targetMessageList.scrollTop = targetMessageList.scrollHeight;
 });
 socket.on('guess result', (data) => {
-    if (data.success) {
-        addGameMessage(data.message, 'success', { fanGroup: data.fanGroup, fanTier: data.fanTier }, data.chatGroupId);
-    } else {
-        addGameMessage(data.message, 'fail', null, data.chatGroupId);
+    addGameMessage(data.message, data.success ? 'success' : 'fail', { fanGroup: data.fanGroup, fanTier: data.fanTier });
+});
+
+socket.on('guesses updated', (guesses) => {
+    currentGuesses = guesses;
+    if (!channelParticipantsModal.classList.contains('hidden')) {
+        const streamerId = channelParticipantsTitle.dataset.streamerId;
+        if (streamerId) openChannelParticipantsModal(streamerId);
+    }
+    if (!privateGuessModal.classList.contains('hidden') && privateGuessTargetUser) {
+        const streamerId = privateGuessTargetInfo.dataset.streamerId;
+        openPrivateGuessModal(privateGuessTargetUser, streamerId);
     }
 });
+
+socket.on('reveal fandom', ({ streamerId, fans }) => {
+    const column = document.getElementById(`chat-column-${streamerId}`);
+    if(column) column.classList.add(`revealed-${streamerId}`);
+
+    fans.forEach(revealedFan => {
+        const userIndex = allUsers.findIndex(u => u.id === revealedFan.id);
+        if (userIndex !== -1) {
+            allUsers[userIndex].isRevealed = true;
+            allUsers[userIndex].actualRole = revealedFan.actualRole;
+        }
+
+        document.querySelectorAll(`[data-user-id="${revealedFan.id}"] .chat-pfp, .participant-card[data-user-id="${revealedFan.id}"] img`).forEach(pfp => {
+            pfp.src = getPfp(allUsers[userIndex]);
+        });
+        document.querySelectorAll(`.message-item[data-user-id="${revealedFan.id}"]`).forEach(item => {
+             item.classList.add(`fan-group-${revealedFan.fanGroup}`);
+        });
+    });
+});
+
+socket.on('game over', (results) => {
+    isGameOver = true;
+    updateEndRoundButtonsAfterGameOver();
+
+    gameOverBody.innerHTML = ''; 
+
+    results.rankings.forEach(rankedStreamer => {
+        const rankerDiv = document.createElement('div');
+        rankerDiv.className = 'ranking-item';
+
+        // [수정] PFP를 찾기 위해 streamerId로 검색
+        const streamerInfo = results.allUsers.find(u => u.streamerId === rankedStreamer.id);
+        const streamerPfp = streamerInfo ? streamerInfo.pfp : '';
+        
+        rankerDiv.innerHTML = `
+            <img src="${streamerPfp}" alt="${rankedStreamer.name}" class="ranking-pfp">
+            <div class="ranking-text-group">
+                <div class="rank-and-name">
+                    <span class="rank rank-${rankedStreamer.rank}">${rankedStreamer.rank}</span> 
+                    <span class="name">${rankedStreamer.name}</span>
+                </div>
+                <span class="round-info">(${rankedStreamer.finishedInRound}라운드 완료)</span>
+            </div>`;
+        
+        const groupDiv = document.createElement('div');
+        groupDiv.className = 'fandom-identity-group';
+        
+        const streamerConfig = gameConfig.streamers.find(s => s.id === rankedStreamer.id);
+        const fansOfStreamer = results.allUsers.filter(u => u.role === 'fan' && u.fanGroup === streamerConfig.fandom.id);
+
+        if (fansOfStreamer.length > 0) {
+            fansOfStreamer.forEach(user => {
+                const card = document.createElement('div');
+                card.className = `identity-card fandom-${user.fanGroup}`;
+                
+                const tier = streamerConfig.fandom.tiers.find(t => t.name === user.fanTier);
+                const roleText = tier.name;
+                let roleClass = 'fan';
+                if (user.actualRole === 'yasik') { roleClass = 'yasik'; }
+                else if (user.actualRole === 'superfan') { roleClass = 'superfan'; }
+    
+                card.innerHTML = `
+                    <img src="${getPfp(user)}" alt="${user.nickname}">
+                    <p class="name">${user.nickname}</p>
+                    <p class="role ${roleClass}">${roleText}</p>
+                `;
+                groupDiv.appendChild(card);
+            });
+        }
+        
+        gameOverBody.appendChild(rankerDiv);
+        gameOverBody.appendChild(groupDiv);
+    });
+
+    gameOverModal.classList.remove('hidden');
+});
+
+
 function updateUserList(users) {
-    allUsers = users;
+    allUsers = users.map(u => ({ ...u, isRevealed: allUsers.find(au => au.id === u.id)?.isRevealed || false }));
     playerListContainer.innerHTML = '';
     const isOwner = socket.id === currentOwnerId;
-    users.forEach(user => {
+    allUsers.forEach(user => {
         let pfpSrcForList = user.pfp;
-        if (currentMode === 'guess_group' && user.role === 'fan') pfpSrcForList = '/images/ghost.png';
+        if (currentMode === 'guess_group' && user.role === 'fan') {
+            pfpSrcForList = '/images/ghost.png';
+        } else if (currentMode === 'fakefan' && user.role === 'fan' && user.isRevealed) {
+            pfpSrcForList = getPfp(user);
+        }
         const playerItem = document.createElement('div');
         playerItem.className = 'player-list-item';
-        let kickBtnHtml = isOwner && user.id !== socket.id ? `<button class="kick-btn" data-id="${user.id}">내보내기</button>` : '';
+        let kickBtnHtml = isOwner && user.id !== socket.id ? `<button class="kick-btn" data-id="${user.id}">강퇴</button>` : '';
         playerItem.innerHTML = `<img src="${pfpSrcForList}" alt="pfp" class="player-pfp"><span class="player-name">${user.nickname} ${user.id === currentOwnerId ? '👑' : ''}</span>${kickBtnHtml}`;
         if (currentMode === 'guess_group' && currentUserData.role === 'streamer' && user.role === 'fan') {
             playerItem.style.cursor = 'pointer';
@@ -469,7 +627,7 @@ function updateUserList(users) {
     document.querySelectorAll('.kick-btn').forEach(button => {
         button.onclick = (e) => {
             e.stopPropagation();
-            if (confirm('정말로 이 플레이어를 내보내시겠습니까?')) {
+            if (confirm('정말로 이 플레이어를 강퇴하시겠습니까?')) {
                 socket.emit('kick player', e.target.dataset.id);
                 managePlayersModal.classList.add('hidden');
             }
@@ -481,6 +639,7 @@ function openChannelParticipantsModal(streamerId) {
     const streamer = gameConfig.streamers.find(s => s.id === streamerId);
     if (!streamer) return;
     channelParticipantsTitle.textContent = `${streamer.name} 채널 참가자`;
+    channelParticipantsTitle.dataset.streamerId = streamerId; 
     channelParticipantsList.innerHTML = '';
     const streamerIdToFandomId = new Map(gameConfig.streamers.map(s => [s.id, s.fandom.id]));
     const participants = allUsers.filter(user => 
@@ -490,8 +649,25 @@ function openChannelParticipantsModal(streamerId) {
     participants.forEach(user => {
         const card = document.createElement('div');
         card.className = 'participant-card';
+        card.dataset.userId = user.id; 
+        
+        if (currentGuesses[user.id] && currentGuesses[user.id][currentUserData.streamerId]) {
+            card.classList.add('guessed');
+        }
+
+        const userData = allUsers.find(u => u.id === user.id);
+        
+        if (userData?.isRevealed && userData.role === 'fan') {
+            card.classList.add(`fandom-${userData.fanGroup}`);
+            const roleElement = document.createElement('p');
+            roleElement.className = 'participant-role';
+            roleElement.textContent = userData.fanTier;
+            card.appendChild(roleElement);
+        }
+        
         const pfp = document.createElement('img');
-        pfp.src = user.pfp;
+        pfp.src = userData.isRevealed ? getPfp(userData) : user.pfp;
+
         const name = document.createElement('p');
         name.textContent = user.nickname;
         if ((currentUserData.role === 'streamer' && currentUserData.streamerId === streamerId) && user.role === 'fan') {
@@ -506,11 +682,11 @@ function openChannelParticipantsModal(streamerId) {
         if (socket.id === currentOwnerId && user.id !== socket.id) {
             const kickBtn = document.createElement('button');
             kickBtn.className = 'kick-btn';
-            kickBtn.textContent = '내보내기';
+            kickBtn.textContent = '강퇴';
             kickBtn.style.marginTop = '0.5rem';
             kickBtn.onclick = (e) => {
                 e.stopPropagation();
-                if (confirm(`정말로 ${user.nickname}님을 내보내시겠습니까?`)) {
+                if (confirm(`정말로 ${user.nickname}님을 강퇴하시겠습니까?`)) {
                     socket.emit('kick player', user.id);
                     channelParticipantsModal.classList.add('hidden');
                 }
@@ -523,25 +699,54 @@ function openChannelParticipantsModal(streamerId) {
 }
 function openPrivateGuessModal(targetUser, chatGroupId) {
     privateGuessTargetUser = targetUser;
-    privateGuessTargetInfo.innerHTML = `<img src="${targetUser.pfp}" class="player-pfp"><span class="player-name">${targetUser.nickname}</span>`;
+    privateGuessTargetInfo.dataset.streamerId = chatGroupId;
+
+    const userData = allUsers.find(u => u.id === targetUser.id) || targetUser;
+
+    privateGuessTargetInfo.innerHTML = '';
+    privateGuessTargetInfo.className = '';
+
+    if (userData.isRevealed) {
+        privateGuessTargetInfo.classList.add(`fandom-${userData.fanGroup}`);
+        const roleElement = document.createElement('p');
+        roleElement.className = 'revealed-identity-tag';
+        roleElement.textContent = userData.fanTier;
+        privateGuessTargetInfo.appendChild(roleElement);
+    }
+
+    const pfpElement = document.createElement('img');
+    pfpElement.src = userData.isRevealed ? getPfp(userData) : userData.pfp;
+    pfpElement.className = 'player-pfp';
+    privateGuessTargetInfo.appendChild(pfpElement);
+
+    const nameElement = document.createElement('span');
+    nameElement.className = 'player-name';
+    nameElement.textContent = userData.nickname;
+    privateGuessTargetInfo.appendChild(nameElement);
+
     privateGuessOptionsContainer.innerHTML = '';
     const streamer = gameConfig.streamers.find(s => s.fandom.id === targetUser.fanGroup);
     if (streamer) {
+        const myGuess = (currentGuesses[targetUser.id] && currentGuesses[targetUser.id][currentUserData.streamerId]) 
+                        ? currentGuesses[targetUser.id][currentUserData.streamerId] : null;
+
         streamer.fandom.tiers.forEach(tier => {
             const btn = document.createElement('button');
             btn.className = 'guess-role-btn with-pfp';
             let pfpSrc = tier.isYasik ? streamer.fandom.yasikPfp : (tier.isSuperFan ? streamer.fandom.superFanPfp : streamer.fandom.pfp);
             let roleType = tier.isYasik ? 'yasik' : (tier.isSuperFan ? 'superfan' : 'fan');
             btn.innerHTML = `<img src="${pfpSrc}" alt="${tier.name}"><span>${tier.name}</span>`;
+            
+            if (myGuess && myGuess.guessedTierName === tier.name) {
+                btn.classList.add('selected');
+            }
+
             btn.onclick = () => {
                 socket.emit('guess role', {
-                    streamerName: currentUserData.nickname,
                     targetUser: privateGuessTargetUser,
                     guessedRole: roleType,
                     guessedTierName: tier.name,
-                    chatGroupId: chatGroupId
                 });
-                privateGuessModal.classList.add('hidden');
             };
             privateGuessOptionsContainer.appendChild(btn);
         });
@@ -555,7 +760,7 @@ function openPrivateGuessModal(targetUser, chatGroupId) {
     });
     privateGuessAdminControls.classList.toggle('hidden', socket.id !== currentOwnerId);
     privateKickBtn.onclick = () => {
-        if (confirm('정말로 이 플레이어를 내보내시겠습니까?')) {
+        if (confirm('정말로 이 플레이어를 강퇴하시겠습니까?')) {
             socket.emit('kick player', targetUser.id);
             privateGuessModal.classList.add('hidden');
         }
@@ -575,7 +780,7 @@ function openFandomGuessModal(targetUser) {
     });
     fandomGuessAdminControls.classList.toggle('hidden', socket.id !== currentOwnerId);
     fandomKickBtn.onclick = () => {
-        if (confirm('정말로 이 플레이어를 내보내시겠습니까?')) {
+        if (confirm('정말로 이 플레이어를 강퇴하시겠습니까?')) {
             socket.emit('kick player', targetUser.id);
             guessGroupModal.classList.add('hidden');
         }
@@ -618,6 +823,11 @@ function addSystemMessage(userData, text) {
         singleChatMessages.scrollTop = singleChatMessages.scrollHeight;
     }
 }
+
+socket.on('game message', ({ message, type, chatGroupId }) => {
+    addGameMessage(message, type, null, chatGroupId);
+});
+
 function addGameMessage(htmlContent, type, pfpData = null, chatGroupId = null) {
     const item = document.createElement('li');
     item.classList.add('game-message', `game-message-${type}`);
@@ -632,21 +842,23 @@ function addGameMessage(htmlContent, type, pfpData = null, chatGroupId = null) {
             item.innerHTML += `<img src="${pfpSrc}" class="game-message-pfp" alt="Fandom Profile">`;
         }
     }
-    if (currentMode === 'fakefan' && chatGroupId) {
-        const targetList = document.getElementById(`messages-${chatGroupId}`);
-        if(targetList) {
-            targetList.appendChild(item);
-            targetList.scrollTop = targetList.scrollHeight;
+    if (currentMode === 'fakefan') {
+        if (chatGroupId) {
+             const targetList = document.getElementById(`messages-${chatGroupId}`);
+            if(targetList) {
+                targetList.appendChild(item);
+                targetList.scrollTop = targetList.scrollHeight;
+            }
+        } else {
+            document.querySelectorAll('#multi-chat-view .messages').forEach(ul => {
+                const clonedItem = item.cloneNode(true);
+                ul.appendChild(clonedItem);
+                ul.scrollTop = ul.scrollHeight;
+            });
         }
     } else if (currentMode === 'guess_group') {
         singleChatMessages.appendChild(item);
         singleChatMessages.scrollTop = singleChatMessages.scrollHeight;
-    } else {
-         document.querySelectorAll('#multi-chat-view .messages').forEach(ul => {
-            const clonedItem = item.cloneNode(true);
-            ul.appendChild(clonedItem);
-            ul.scrollTop = ul.scrollHeight;
-        });
     }
 }
 function initialize() {

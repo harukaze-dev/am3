@@ -65,7 +65,6 @@
                 <div class="chat-column-header streamer-yeonri">
                     <div class="column-title"><img src="/images/streamer_yeonri.png" alt="연리"><span>연리-연밥 채널</span></div>
                     <div class="settings-container">
-                        <!-- [수정] 버튼 아이콘을 '☰'로 변경 -->
                         <button class="header-btn column-settings-btn">☰</button>
                         <div class="settings-menu hidden">
                             <button class="menu-copy-code-btn">📋 코드 복사</button>
@@ -75,6 +74,7 @@
                 </div>
                 <ul class="messages" id="messages-yeonri"></ul>
                 <form class="chat-form hidden" data-groupid="yeonri">
+                    <button type="button" class="end-round-btn">라운드 종료</button>
                     <input autocomplete="off" placeholder="메시지 입력..." />
                     <button type="submit">전송</button>
                 </form>
@@ -84,7 +84,6 @@
                 <div class="chat-column-header streamer-morara">
                     <div class="column-title"><img src="/images/streamer_morara.png" alt="모라라"><span>모라라-코랄단 채널</span></div>
                     <div class="settings-container">
-                        <!-- [수정] 버튼 아이콘을 '☰'로 변경 -->
                         <button class="header-btn column-settings-btn">☰</button>
                         <div class="settings-menu hidden">
                             <button class="menu-copy-code-btn">📋 코드 복사</button>
@@ -94,6 +93,7 @@
                 </div>
                 <ul class="messages" id="messages-morara"></ul>
                 <form class="chat-form hidden" data-groupid="morara">
+                    <button type="button" class="end-round-btn">라운드 종료</button>
                     <input autocomplete="off" placeholder="메시지 입력..." />
                     <button type="submit">전송</button>
                 </form>
@@ -103,7 +103,6 @@
                 <div class="chat-column-header streamer-haeblin">
                     <div class="column-title"><img src="/images/streamer_haeblin.png" alt="해블린"><span>해블린-디그단 채널</span></div>
                     <div class="settings-container">
-                        <!-- [수정] 버튼 아이콘을 '☰'로 변경 -->
                         <button class="header-btn column-settings-btn">☰</button>
                         <div class="settings-menu hidden">
                             <button class="menu-copy-code-btn">📋 코드 복사</button>
@@ -113,6 +112,7 @@
                 </div>
                 <ul class="messages" id="messages-haeblin"></ul>
                 <form class="chat-form hidden" data-groupid="haeblin">
+                    <button type="button" class="end-round-btn">라운드 종료</button>
                     <input autocomplete="off" placeholder="메시지 입력..." />
                     <button type="submit">전송</button>
                 </form>
@@ -126,7 +126,6 @@
                     <button id="manage-players-btn" class="header-btn hidden">👥 플레이어 관리</button>
                     <h3 id="chat-room-title">채팅방</h3>
                     <div class="settings-container">
-                        <!-- [수정] 버튼 아이콘과 텍스트 변경 -->
                         <button id="settings-btn" class="header-btn">☰ 설정</button>
                         <div id="settings-menu" class="settings-menu hidden">
                             <button class="menu-copy-code-btn">📋 코드 복사</button>
@@ -205,6 +204,19 @@
                 <ul id="guess-group-chat-log" class="messages"></ul>
             </div>
             <button id="guess-group-modal-close" class="modal-close-btn">×</button>
+        </div>
+    </div>
+
+    <div id="game-over-modal" class="modal-overlay hidden">
+        <div class="game-over-content">
+            <div class="game-over-header">
+                <h1>🎉 게임 종료! 🎉</h1>
+            </div>
+            <!-- [수정] left/right 컨테이너 제거, JS가 직접 그리드를 채울 컨테이너만 남김 -->
+            <div id="game-over-body">
+                <!-- JavaScript가 여기에 순위와 팬 목록을 그립니다 -->
+            </div>
+            <button id="game-over-close-btn" class="main-menu-btn">확인</button>
         </div>
     </div>
 

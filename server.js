@@ -1,5 +1,3 @@
-// server.js
-
 const express = require('express');
 const http = require('http');
 const { Server } = require("socket.io");
@@ -61,6 +59,19 @@ function closeRoom(roomId, reason) {
     rooms.delete(roomId);
 }
 
+function mapToObject(map) {
+    const obj = {};
+    for (let [key, value] of map.entries()) {
+        if (value instanceof Map) {
+            obj[key] = mapToObject(value);
+        } else {
+            obj[key] = value;
+        }
+    }
+    return obj;
+}
+
+
 io.on('connection', (socket) => {
   console.log(`A user connected: ${socket.id} from IP: ${socket.handshake.address}`);
   
@@ -85,9 +96,12 @@ io.on('connection', (socket) => {
         users: new Map([[socket.id, socket.userData]]),
         ownerId: socket.id,
         kickedIPs: new Set(),
-        mode: mode
+        mode: mode,
+        guesses: new Map(), 
+        finishedStreamers: [], 
+        currentRound: 1 
     });
-    socket.emit('room created', { roomId, users: getUsersInRoom(roomId), ownerId: socket.id, mode: mode });
+    socket.emit('room created', { roomId, users: getUsersInRoom(roomId), ownerId: socket.id, mode: mode, currentRound: 1 });
     console.log(`User ${userData.nickname} created room ${roomId} with mode: ${mode}`);
   });
 
@@ -103,8 +117,11 @@ io.on('connection', (socket) => {
     socket.userData = { ...userData, id: socket.id };
     socket.roomId = roomId;
     room.users.set(socket.id, socket.userData);
-    socket.emit('join success', { roomId, users: getUsersInRoom(roomId), ownerId: room.ownerId, mode: room.mode });
+    socket.emit('join success', { roomId, users: getUsersInRoom(roomId), ownerId: room.ownerId, mode: room.mode, currentRound: room.currentRound });
     socket.to(roomId).emit('user joined', { user: socket.userData, users: getUsersInRoom(roomId) });
+    if (room.guesses.size > 0) {
+        socket.emit('guesses updated', mapToObject(room.guesses));
+    }
     console.log(`User ${userData.nickname} joined room ${roomId}`);
   });
   
@@ -128,25 +145,119 @@ io.on('connection', (socket) => {
       }
   });
 
-  // [수정됨] 추측이 발생한 채널 ID(chatGroupId)를 받아, 결과도 해당 채널에만 전송하도록 수정
   socket.on('guess role', (data) => {
-    const { streamerName, targetUser, guessedRole, guessedTierName, chatGroupId } = data;
+    const { targetUser, guessedRole, guessedTierName } = data;
     const room = rooms.get(socket.roomId);
-    if (!room || !targetUser) return;
-    const actualRole = getUserRole(targetUser);
-    const payload = {
-        success: false,
-        message: `❌ ${streamerName}님이 ${targetUser.nickname}님을 ${guessedTierName}(으)로 추측했지만, 아니었습니다!`,
-        chatGroupId: chatGroupId // 클라이언트로 다시 보낼 채널 ID
-    };
-    if (actualRole === guessedRole) {
-        payload.success = true;
-        payload.message = `🎯 ${streamerName}님이 ${targetUser.nickname}님의 정체(<span>'${targetUser.fanTier}'</span>)를 맞혔습니다!`;
-        payload.fanGroup = targetUser.fanGroup;
-        payload.fanTier = targetUser.fanTier;
+    if (!room || !targetUser || !socket.userData || socket.userData.role !== 'streamer') return;
+
+    const streamerId = socket.userData.streamerId;
+
+    if (!room.guesses.has(targetUser.id)) {
+        room.guesses.set(targetUser.id, new Map());
     }
-    io.to(socket.roomId).emit('guess result', payload);
+    
+    const userGuesses = room.guesses.get(targetUser.id);
+    userGuesses.set(streamerId, { guessedRole, guessedTierName });
+    
+    io.to(socket.roomId).emit('guesses updated', mapToObject(room.guesses));
   });
+
+  socket.on('end round', () => {
+    const room = rooms.get(socket.roomId);
+    const user = socket.userData;
+    if (!room || !user || user.role !== 'streamer') return;
+
+    const allUsersInRoom = getUsersInRoom(socket.roomId);
+    const streamersInRoom = allUsersInRoom.filter(u => u.role === 'streamer');
+    
+    streamersInRoom.forEach(streamer => {
+        if (room.finishedStreamers.some(f => f.streamerId === streamer.streamerId)) {
+            return;
+        }
+
+        const streamerConfig = config.streamers.find(s => s.id === streamer.streamerId);
+        if (!streamerConfig) return;
+
+        const myFandomId = streamerConfig.fandom.id;
+        const myFans = allUsersInRoom.filter(u => u.role === 'fan' && u.fanGroup === myFandomId);
+        
+        let correctCount = 0;
+        myFans.forEach(fan => {
+            const fanGuesses = room.guesses.get(fan.id);
+            if (fanGuesses && fanGuesses.has(streamer.streamerId)) {
+                const guess = fanGuesses.get(streamer.streamerId);
+                const actualRole = getUserRole(fan);
+                if (guess.guessedRole === actualRole) {
+                    correctCount++;
+                }
+            }
+        });
+
+        const resultMessage = `📢 [${room.currentRound} 라운드 결과] ${streamer.nickname}님이 자신의 팬 ${myFans.length}명 중 ${correctCount}명의 정체를 맞혔습니다!`;
+        io.to(socket.roomId).emit('game message', { message: resultMessage, type: 'reveal', chatGroupId: streamer.streamerId });
+        
+        if (correctCount === myFans.length && myFans.length > 0) {
+            // [수정] 축하 메시지에 공동 순위 로직 적용
+            const tempFinished = [...room.finishedStreamers, { streamerId: streamer.streamerId, finishedInRound: room.currentRound }];
+            tempFinished.sort((a, b) => a.finishedInRound - b.finishedInRound);
+            
+            let currentRank = 0;
+            let lastRound = -1;
+            let rankForMessage = 0;
+            tempFinished.forEach((fin, index) => {
+                if (fin.finishedInRound > lastRound) {
+                    currentRank = index + 1;
+                }
+                if (fin.streamerId === streamer.streamerId) {
+                    rankForMessage = currentRank;
+                }
+                lastRound = fin.finishedInRound;
+            });
+            
+            room.finishedStreamers.push({ streamerId: streamer.streamerId, finishedInRound: room.currentRound });
+
+            const celebrationMessage = `🎉 축하합니다! ${streamer.nickname}님이 ${room.currentRound}라운드에 모든 팬의 정체를 간파했습니다! (${rankForMessage}등) 🎉`;
+            io.to(socket.roomId).emit('game message', { message: celebrationMessage, type: 'success', chatGroupId: streamer.streamerId });
+
+            const revealedFanData = myFans.map(fan => ({
+                ...fan,
+                actualRole: getUserRole(fan)
+            }));
+            io.to(socket.roomId).emit('reveal fandom', { streamerId: streamer.streamerId, fans: revealedFanData });
+        }
+    });
+
+    room.currentRound++;
+    io.to(socket.roomId).emit('round advanced', room.currentRound);
+
+    if (room.finishedStreamers.length === streamersInRoom.length && streamersInRoom.length > 0) {
+        let rank = 0;
+        let lastRound = -1;
+        // 완료 라운드 기준으로 먼저 정렬
+        room.finishedStreamers.sort((a, b) => a.finishedInRound - b.finishedInRound);
+
+        const rankings = room.finishedStreamers.map((finishedData, index) => {
+            if (finishedData.finishedInRound > lastRound) {
+                rank = index + 1;
+            }
+            lastRound = finishedData.finishedInRound;
+            const streamerUser = streamersInRoom.find(s => s.streamerId === finishedData.streamerId);
+            return {
+                rank: rank,
+                name: streamerUser.nickname,
+                id: finishedData.streamerId,
+                finishedInRound: finishedData.finishedInRound
+            };
+        });
+
+        const finalResults = {
+            rankings: rankings,
+            allUsers: allUsersInRoom.map(u => ({...u, actualRole: getUserRole(u)}))
+        };
+        io.to(socket.roomId).emit('game over', finalResults);
+    }
+  });
+
 
   socket.on('kick player', (targetUserId) => {
     const room = rooms.get(socket.roomId);
@@ -194,7 +305,6 @@ io.on('connection', (socket) => {
     console.log(`A user disconnected: ${socket.id}`);
   });
 
-  // [수정됨] '가짜팬 찾기' 모드에서 채널별 채팅 권한 검사 로직 추가
   socket.on('chat message', (data) => {
     const { message, chatGroupId } = data;
     const user = socket.userData;
@@ -208,13 +318,11 @@ io.on('connection', (socket) => {
         const streamerConfig = config.streamers.find(s => s.id === chatGroupId);
         if (!streamerConfig) return;
 
-        // 해당 채널의 스트리머이거나, 해당 스트리머의 팬일 경우에만 채팅 가능
         if ((user.role === 'streamer' && user.streamerId === chatGroupId) || 
             (user.role === 'fan' && user.fanGroup === streamerConfig.fandom.id)) {
             canChat = true;
         }
     } else {
-        // 다른 모드는 항상 채팅 가능
         canChat = true;
     }
 

@@ -11,10 +11,8 @@
   --haeblin-color: #AAB1E5;
   --kick-color: #d9534f;
   --kick-hover: #c9302c;
-  /* [수정] 방 나가기 버튼의 기본 색상을 더 연한 빨간색으로 변경 */
   --danger-color: #EF5350;
   --danger-hover-bg: rgba(240, 71, 71, 0.1);
-  /* [추가] 방 나가기 버튼의 호버 색상 변수 추가 */
   --danger-hover-color: #D32F2F;
 }
 body {
@@ -120,7 +118,6 @@ select:focus, #nickname-input:focus { outline: none; border-color: var(--primary
     background-color: var(--danger-color);
     font-weight: 700;
 }
-/* [수정] 방 나가기 버튼의 호버 색상을 새로운 변수로 지정 */
 .settings-menu button.danger:hover {
     background-color: var(--danger-hover-color);
 }
@@ -170,11 +167,12 @@ select:focus, #nickname-input:focus { outline: none; border-color: var(--primary
 .message-bubble::before { content: ""; position: absolute; top: 50%; transform: translateY(-50%); width: 0; height: 0; border-style: solid; }
 .message-item:not(.streamer-message) .message-bubble::before { left: -8px; border-width: 8px 10px 8px 0; border-color: transparent #e4e6eb transparent transparent; }
 .streamer-message .message-bubble::before { right: -8px; border-width: 8px 0 8px 10px; border-color: transparent transparent transparent #AAB1E5; }
-.streamer-haeblin .message-bubble { background: linear-gradient(to bottom, #AAB1E5, #c1c6f0); }
-.streamer-yeonri .message-bubble { background: linear-gradient(to bottom, #B695E0, #d1b8f0); }
-.streamer-morara .message-bubble { background: linear-gradient(to bottom, #F4979F, #f7b3b9); }
-.streamer-yeonri .message-bubble::before { border-left-color: #B695E0; }
-.streamer-morara .message-bubble::before { border-left-color: #F4979F; }
+/* [수정] 스트리머 말풍선 배경을 그라데이션에서 단색으로 변경 */
+.streamer-haeblin .message-bubble { background: var(--haeblin-color); }
+.streamer-yeonri .message-bubble { background: var(--yeonri-color); }
+.streamer-morara .message-bubble { background: var(--morara-color); }
+.streamer-yeonri .message-bubble::before { border-left-color: var(--yeonri-color); }
+.streamer-morara .message-bubble::before { border-left-color: var(--morara-color); }
 .system-message { display: flex; align-items: center; justify-content: center; gap: 0.75em; margin: 0.5rem auto; }
 .system-pfp { width: 24px; height: 24px; border-radius: 50%; background-color: white; border: 1px solid #999; padding: 1px; box-sizing: border-box; }
 .system-nickname { color: white; font-weight: 700; font-style: normal; }
