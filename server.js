@@ -193,11 +193,9 @@ io.on('connection', (socket) => {
             }
         });
 
-        const resultMessage = `📢 [${room.currentRound} 라운드 결과] ${streamer.nickname}님이 자신의 팬 ${myFans.length}명 중 ${correctCount}명의 정체를 맞혔습니다!`;
-        io.to(socket.roomId).emit('game message', { message: resultMessage, type: 'reveal', chatGroupId: streamer.streamerId });
-        
+        // [수정] 모든 팬을 맞춘 경우와 아닌 경우를 분기 처리
         if (correctCount === myFans.length && myFans.length > 0) {
-            // [수정] 축하 메시지에 공동 순위 로직 적용
+            // 모든 팬을 맞춘 경우: 축하 메시지만 전송
             const tempFinished = [...room.finishedStreamers, { streamerId: streamer.streamerId, finishedInRound: room.currentRound }];
             tempFinished.sort((a, b) => a.finishedInRound - b.finishedInRound);
             
@@ -216,7 +214,7 @@ io.on('connection', (socket) => {
             
             room.finishedStreamers.push({ streamerId: streamer.streamerId, finishedInRound: room.currentRound });
 
-            const celebrationMessage = `🎉 축하합니다! ${streamer.nickname}님이 ${room.currentRound}라운드에 모든 팬의 정체를 간파했습니다! (${rankForMessage}등) 🎉`;
+            const celebrationMessage = `🎉 ${streamer.nickname}님이 모든 팬의 정체를 맞혔습니다! (${rankForMessage}등) 🎉`;
             io.to(socket.roomId).emit('game message', { message: celebrationMessage, type: 'success', chatGroupId: streamer.streamerId });
 
             const revealedFanData = myFans.map(fan => ({
@@ -224,6 +222,11 @@ io.on('connection', (socket) => {
                 actualRole: getUserRole(fan)
             }));
             io.to(socket.roomId).emit('reveal fandom', { streamerId: streamer.streamerId, fans: revealedFanData });
+
+        } else {
+            // 아직 모든 팬을 맞추지 못한 경우: 라운드 결과 메시지만 전송
+            const resultMessage = `📢 [${room.currentRound}라운드] ${streamer.nickname}님이 ${myFans.length}명 중 ${correctCount}명을 찾아냈습니다.`;
+            io.to(socket.roomId).emit('game message', { message: resultMessage, type: 'reveal', chatGroupId: streamer.streamerId });
         }
     });
 
@@ -233,7 +236,6 @@ io.on('connection', (socket) => {
     if (room.finishedStreamers.length === streamersInRoom.length && streamersInRoom.length > 0) {
         let rank = 0;
         let lastRound = -1;
-        // 완료 라운드 기준으로 먼저 정렬
         room.finishedStreamers.sort((a, b) => a.finishedInRound - b.finishedInRound);
 
         const rankings = room.finishedStreamers.map((finishedData, index) => {

@@ -36,16 +36,17 @@
             <h1 id="profile-setup-title">프로필 설정</h1>
             <p>당신의 역할과 닉네임을 정해주세요.</p>
         </div>
+        <!-- [수정] 팬/스트리머 순서 변경 및 팬 기본 선택 -->
         <div class="form-group role-selection">
-            <input type="radio" name="role" value="streamer" id="role-streamer" checked>
-            <label for="role-streamer" class="role-label">🎮 스트리머</label>
-            <input type="radio" name="role" value="fan" id="role-fan">
+            <input type="radio" name="role" value="fan" id="role-fan" checked>
             <label for="role-fan" class="role-label">💖 팬</label>
+            <input type="radio" name="role" value="streamer" id="role-streamer">
+            <label for="role-streamer" class="role-label">🎮 스트리머</label>
         </div>
-        <div id="streamer-options" class="form-group">
+        <div id="streamer-options" class="form-group hidden">
             <select id="streamer-select"></select>
         </div>
-        <div id="fan-options" class="form-group hidden">
+        <div id="fan-options" class="form-group">
             <select id="fan-group-select"></select>
             <select id="fan-tier-select"></select>
         </div>
@@ -212,7 +213,6 @@
             <div class="game-over-header">
                 <h1>🎉 게임 종료! 🎉</h1>
             </div>
-            <!-- [수정] left/right 컨테이너 제거, JS가 직접 그리드를 채울 컨테이너만 남김 -->
             <div id="game-over-body">
                 <!-- JavaScript가 여기에 순위와 팬 목록을 그립니다 -->
             </div>
