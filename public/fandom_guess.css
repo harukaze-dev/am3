@@ -53,7 +53,6 @@
 }
 .header-btn:hover { background-color: #4f545c; }
 
-/* [추가] '팬덤 맞추기' 모드의 설정 버튼 스타일 재정의 */
 #settings-btn {
     background-color: white;
     color: var(--text-dark);
@@ -68,6 +67,7 @@
 }
 
 
+/* 채팅 폼 스타일: 라운드 종료 버튼을 포함하도록 flexbox 레이아웃 적용 */
 #form {
     background: #ffffff;
     padding: 0.75rem;
@@ -77,6 +77,26 @@
     gap: 0.75rem;
     align-items: center;
     flex-shrink: 0;
+}
+
+/* 팬덤 맞추기 모드의 라운드 종료 버튼 스타일 */
+#form .end-round-btn {
+    padding: 0.6rem 1rem;
+    border: none;
+    border-radius: 2rem;
+    background-color: #28a745;
+    color: white;
+    font-weight: 700;
+    cursor: pointer;
+    transition: background-color 0.2s, filter 0.2s;
+    white-space: nowrap;
+}
+#form .end-round-btn:hover { 
+    filter: brightness(1.1); 
+}
+#form .end-round-btn:disabled {
+    background-color: #6c757d;
+    cursor: not-allowed;
 }
 
 #input {
@@ -94,7 +114,7 @@
     box-shadow: 0 0 0 2px var(--primary-color);
 }
 
-#form button {
+#form button[type="submit"] {
     border: none;
     border-radius: 2rem;
     color: #fff;
@@ -103,10 +123,13 @@
     transition: background-color 0.2s, opacity 0.2s;
     padding: 0.6rem 1.2rem;
     white-space: nowrap;
+    background: var(--primary-color);
 }
 
-#form button:hover { opacity: 0.85; }
-#form button[type="submit"] { background: var(--primary-color); }
+#form button[type="submit"]:hover { 
+    opacity: 0.85; 
+}
+
 
 /* --- 팬덤 맞추기 모드용 모달 --- */
 .guess-group-content {
@@ -138,4 +161,131 @@
 }
 #fandom-kick-btn {
     width: 100%;
+}
+
+/* --- [추가] 게임 종료 모달 스타일 (fake_fan.css에서 복사) --- */
+.game-over-content {
+    background-color: #36393f;
+    color: #dcddde;
+    padding: 2rem 3rem;
+    border-radius: 12px;
+    width: 90%;
+    max-width: 1200px; 
+    max-height: 90vh;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+}
+.game-over-header {
+    margin-bottom: 1.5rem;
+}
+.game-over-header h1 {
+    font-size: 2.5rem;
+    color: #ffd700;
+    text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+    margin: 0;
+}
+
+#game-over-body {
+    display: grid;
+    grid-template-columns: 1fr 2fr; 
+    gap: 1.5rem;
+    overflow-y: auto;
+    flex-grow: 1;
+    grid-auto-rows: min-content; 
+}
+
+.ranking-item {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    background-color: #40444b;
+    padding: 1.5rem;
+    border-radius: 8px;
+    box-sizing: border-box;
+}
+.ranking-pfp {
+    width: 70px;
+    height: 70px;
+    border-radius: 50%;
+    border: 3px solid #5c5f66;
+    flex-shrink: 0;
+}
+.ranking-text-group {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    text-align: left;
+}
+.ranking-text-group .rank-and-name {
+    display: flex;
+    align-items: baseline;
+    gap: 0.75rem;
+}
+.ranking-item .rank {
+    font-weight: 900;
+    font-size: 2rem;
+    line-height: 1;
+}
+.ranking-item .rank-1 { color: #ffd700; }
+.ranking-item .rank-2 { color: #c0c0c0; }
+.ranking-item .rank-3 { color: #cd7f32; }
+.ranking-item .name { font-weight: 700; font-size: 1.4rem; }
+.ranking-item .round-info { font-size: 0.9rem; color: #b9bbbe; margin-top: 0.25rem; }
+
+
+.fandom-identity-group {
+    background-color: #2f3136;
+    border-radius: 8px;
+    padding: 1rem;
+    display: flex;
+    flex-wrap: wrap; 
+    gap: 0.75rem;
+    align-content: flex-start; 
+    box-sizing: border-box;
+}
+
+.identity-card {
+    background-color: #40444b;
+    padding: 0.75rem;
+    border-radius: 5px;
+    text-align: center;
+    width: 120px; 
+    flex-shrink: 0;
+}
+.identity-card img {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    margin-bottom: 0.1rem; 
+    border: 2px solid white;
+}
+.identity-card .name { 
+    font-weight: 700; 
+    font-size: 0.95rem; 
+    margin: 0 0 0.1rem 0;
+    display: block;
+}
+.identity-card .role {
+    font-size: 0.8rem;
+    color: white;
+    font-weight: bold;
+    padding: 3px 8px;
+    margin-bottom: 0.1rem; 
+    border-radius: 10px;
+    display: inline-block;
+}
+.identity-card.fandom-yeonbab .role { background-color: var(--yeonri-color); }
+.identity-card.fandom-coral .role { background-color: var(--morara-color); }
+.identity-card.fandom-digdan .role { background-color: var(--haeblin-color); }
+.identity-card .role.yasik { 
+    background-color: white;
+    color: #333;
+}
+
+#game-over-close-btn {
+    margin-top: 1.5rem;
+    width: auto;
+    align-self: center;
+    padding: 0.8rem 2.5rem;
 }

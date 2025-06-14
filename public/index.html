@@ -36,7 +36,6 @@
             <h1 id="profile-setup-title">프로필 설정</h1>
             <p>당신의 역할과 닉네임을 정해주세요.</p>
         </div>
-        <!-- [수정] 팬/스트리머 순서 변경 및 팬 기본 선택 -->
         <div class="form-group role-selection">
             <input type="radio" name="role" value="fan" id="role-fan" checked>
             <label for="role-fan" class="role-label">💖 팬</label>
@@ -61,6 +60,7 @@
     </div>
 
     <div id="chat-container" class="hidden">
+        <!-- '가짜팬 찾기' 모드용 멀티 채팅 뷰 -->
         <div id="multi-chat-view" class="hidden">
             <div class="chat-column" id="chat-column-yeonri" data-streamer-id="yeonri">
                 <div class="chat-column-header streamer-yeonri">
@@ -76,7 +76,7 @@
                 <ul class="messages" id="messages-yeonri"></ul>
                 <form class="chat-form hidden" data-groupid="yeonri">
                     <button type="button" class="end-round-btn">라운드 종료</button>
-                    <input autocomplete="off" placeholder="메시지 입력..." />
+                    <input type="text" autocomplete="off" placeholder="메시지 입력..." />
                     <button type="submit">전송</button>
                 </form>
                 <div class="column-resize-handle"></div>
@@ -95,7 +95,7 @@
                 <ul class="messages" id="messages-morara"></ul>
                 <form class="chat-form hidden" data-groupid="morara">
                     <button type="button" class="end-round-btn">라운드 종료</button>
-                    <input autocomplete="off" placeholder="메시지 입력..." />
+                    <input type="text" autocomplete="off" placeholder="메시지 입력..." />
                     <button type="submit">전송</button>
                 </form>
                 <div class="column-resize-handle"></div>
@@ -114,13 +114,14 @@
                 <ul class="messages" id="messages-haeblin"></ul>
                 <form class="chat-form hidden" data-groupid="haeblin">
                     <button type="button" class="end-round-btn">라운드 종료</button>
-                    <input autocomplete="off" placeholder="메시지 입력..." />
+                    <input type="text" autocomplete="off" placeholder="메시지 입력..." />
                     <button type="submit">전송</button>
                 </form>
                 <div class="column-resize-handle"></div>
             </div>
         </div>
 
+        <!-- '팬덤 맞추기' 모드용 단일 채팅 뷰 -->
         <div id="single-chat-view" class="hidden">
             <div id="chat-wrapper">
                 <div id="chat-header">
@@ -136,12 +137,14 @@
                 </div>
                 <ul id="messages" class="messages"></ul>
                 <form id="form" action="">
+                    <button type="button" class="end-round-btn">라운드 종료</button>
                     <input id="input" autocomplete="off" placeholder="메시지를 입력하세요..." /><button type="submit">전송</button>
                 </form>
             </div>
         </div>
     </div>
 
+    <!-- '가짜팬 찾기' 모드용 참가자 목록 모달 -->
     <div id="channel-participants-modal" class="modal-overlay hidden">
         <div class="modal-content">
             <h2 id="channel-participants-title">채널 참가자 목록</h2>
@@ -150,6 +153,7 @@
         </div>
     </div>
 
+    <!-- '가짜팬 찾기' 모드용 개인 추리 모달 -->
     <div id="private-guess-modal" class="modal-overlay hidden">
         <div class="private-guess-content">
             <div class="private-guess-left">
@@ -168,6 +172,7 @@
         </div>
     </div>
     
+    <!-- 공용 플레이어 관리 모달 -->
     <div id="manage-players-modal" class="modal-overlay hidden">
         <div class="modal-content">
             <h2>플레이어 관리</h2>
@@ -177,6 +182,7 @@
         </div>
     </div>
     
+    <!-- '팬덤 맞추기' 모드용 팬덤 추리 모달 -->
     <div id="guess-group-modal" class="modal-overlay hidden">
         <div class="guess-group-content">
             <div class="guess-group-left">
@@ -208,6 +214,7 @@
         </div>
     </div>
 
+    <!-- 공용 게임 종료 모달 -->
     <div id="game-over-modal" class="modal-overlay hidden">
         <div class="game-over-content">
             <div class="game-over-header">
