@@ -123,13 +123,22 @@ io.on('connection', (socket) => {
   // 방 생성 요청 처리
   socket.on('create room', (data) => {
     const { userData, mode } = data;
-    // 스트리머만 방을 만들 수 있도록 제한
-    if (userData.role !== 'streamer') {
-        return socket.emit('error message', '스트리머만 방을 만들 수 있습니다.');
+    
+    // [수정] 스트리머 역할일 경우, 서버에서 직접 인증 키를 확인
+    if (userData.role === 'streamer') {
+        const STREAMER_KEY = 'am3'; // 서버에 저장된 스트리머 인증 키
+        if (userData.streamerKey !== STREAMER_KEY) {
+            return socket.emit('error message', '스트리머 인증 키가 올바르지 않습니다.');
+        }
     }
+
     const roomId = generateRoomId(); // 새 방 ID 생성
     socket.join(roomId); // 소켓을 새 방에 조인
-    socket.userData = { ...userData, id: socket.id }; // 소켓에 유저 데이터 저장
+    
+    // 인증에 사용된 키는 소켓 데이터에 저장하지 않음
+    const { streamerKey, ...safeUserData } = userData;
+    socket.userData = { ...safeUserData, id: socket.id }; // 소켓에 유저 데이터 저장
+    
     socket.roomId = roomId; // 소켓에 방 ID 저장
     // 새 방 정보 생성 및 저장
     rooms.set(roomId, {
@@ -149,6 +158,15 @@ io.on('connection', (socket) => {
   // 방 참가 요청 처리
   socket.on('join room', (data) => {
     const { roomId, userData } = data;
+
+    // [수정] 스트리머 역할일 경우, 서버에서 직접 인증 키를 확인
+    if (userData.role === 'streamer') {
+        const STREAMER_KEY = 'am3';
+        if (userData.streamerKey !== STREAMER_KEY) {
+            return socket.emit('error message', '스트리머 인증 키가 올바르지 않습니다.');
+        }
+    }
+    
     const room = rooms.get(roomId);
     if (!room) return socket.emit('error message', '존재하지 않는 방입니다.');
     // 강퇴된 IP인지 확인
@@ -158,7 +176,11 @@ io.on('connection', (socket) => {
         return socket.emit('error message', '이미 같은 스트리머가 방에 참여하고 있습니다.');
     }
     socket.join(roomId);
-    socket.userData = { ...userData, id: socket.id };
+
+    // 인증에 사용된 키는 소켓 데이터에 저장하지 않음
+    const { streamerKey, ...safeUserData } = userData;
+    socket.userData = { ...safeUserData, id: socket.id };
+
     socket.roomId = roomId;
     room.users.set(socket.id, socket.userData); // 방의 유저 목록에 추가
     // 참가 성공 이벤트 전송

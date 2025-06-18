@@ -74,6 +74,13 @@
     align-items: center;
     gap: 0.75rem;
     cursor: pointer;
+    flex-grow: 1; 
+    min-width: 0; 
+}
+.column-title span {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 .column-title img {
@@ -81,22 +88,29 @@
     height: 32px;
     border-radius: 50%;
     border: 2px solid white;
+    flex-shrink: 0;
+}
+
+.header-controls-right {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    flex-shrink: 0;
 }
 
 .column-settings-btn {
-    background-color: white;
-    color: var(--text-dark);
+    background: none;
     border: none;
-    border-radius: 5px;
-    padding: 0.4rem 0.8rem;
-    cursor: pointer;
-    font-size: 1rem;
-    font-weight: 700;
+    color: white;
+    font-size: 1.2rem;
+    padding: 0.2rem;
     line-height: 1;
+    cursor: pointer;
     transition: all 0.2s;
 }
 .column-settings-btn:hover {
-    background-color: var(--light-gray);
+    transform: scale(1.1);
+    opacity: 0.8;
 }
 
 
@@ -266,24 +280,57 @@
     text-overflow: ellipsis;
 }
 
+/* [수정] '정체 맞추기' 모달 레이아웃 변경 */
 .private-guess-content {
     position: relative; background-color: #36393f; color: #dcddde;
-    padding: 2rem; border-radius: 10px; width: 90%; max-width: 1000px;
-    display: flex; gap: 1.5rem; height: 80vh;
+    padding: 2rem; border-radius: 10px; width: 90%; max-width: 1200px;
+    display: flex; gap: 1.5rem; height: 85vh;
 }
-.private-guess-left { width: 300px; flex-shrink: 0; display: flex; flex-direction: column; gap: 1.5rem; }
-.private-guess-right { flex-grow: 1; display: flex; flex-direction: column; background-color: #2f3136; border-radius: 8px; overflow: hidden; }
-.private-guess-left h3, .private-guess-right h3 { margin: 0; padding-bottom: 1rem; border-bottom: 1px solid #4f545c; text-align: center;}
+.private-guess-left { 
+    flex-basis: 280px; /* 왼쪽 영역 너비 축소 및 고정 */
+    flex-shrink: 0;
+    display: flex; 
+    flex-direction: column; 
+    gap: 1rem; 
+    min-height: 0;
+}
+.private-guess-right { 
+    flex: 1; /* 오른쪽 영역이 남은 공간 모두 차지 */
+    display: flex; 
+    flex-direction: column; 
+    min-width: 0;
+}
+.private-guess-left h3, .private-guess-right h3 { 
+    margin: 0 0 1rem 0; 
+    padding-bottom: 1rem; 
+    border-bottom: 1px solid #4f545c; 
+    text-align: center;
+    flex-shrink: 0;
+}
+
+.modal-right-content-wrapper {
+    display: flex;
+    gap: 1rem;
+    flex-grow: 1;
+    min-height: 0; 
+}
+#private-chat-log {
+    flex: 1; 
+    background-color: #2f3136;
+    border-radius: 8px;
+    display: flex;
+    flex-direction: column;
+}
+
 #private-guess-target-info { display: flex; flex-direction: column; align-items: center; gap: 1rem; }
 #private-guess-target-info .player-pfp { width: 100px; height: 100px; border-radius: 50%; }
 #private-guess-target-info .player-name { font-size: 1.3rem; font-weight: 700; }
 #private-guess-options-container {
     display: flex;
     flex-direction: column;
-    gap: 1rem;
-    overflow-y: auto; 
+    gap: 0.5rem; 
 }
-.guess-role-btn { display: flex; align-items: center; gap: 0.75rem; padding: 1rem; flex-grow: 1; background-color: #40444b; border: 2px solid #4f545c; border-radius: 8px; cursor: pointer; font-weight: 700; font-size: 1rem; color: white; transition: transform 0.2s, box-shadow 0.2s, border-color 0.2s, background-color 0.2s; }
+.guess-role-btn { display: flex; align-items: center; gap: 0.75rem; padding: 0.75rem; flex-grow: 1; background-color: #40444b; border: 2px solid #4f545c; border-radius: 8px; cursor: pointer; font-weight: 700; font-size: 1rem; color: white; transition: transform 0.2s, box-shadow 0.2s, border-color 0.2s, background-color 0.2s; }
 .guess-role-btn.with-pfp {
     flex-direction: row;
     justify-content: flex-start;
@@ -298,9 +345,70 @@
 .guess-role-btn img { width: 40px; height: 40px; border-radius: 50%; object-fit: cover; }
 #private-guess-admin-controls { margin-top: auto; padding-top: 1.5rem; border-top: 1px solid #4f545c; }
 #private-kick-btn { width: 100%; }
-#private-chat-log { padding: 1rem; }
 
-/* --- [복구] 게임 종료 모달 스타일 (원상복구) --- */
+
+/* '정체 맞추기' 모달의 다른 팬 목록 스타일 */
+#other-fans-container {
+    flex-basis: 220px; 
+    flex-shrink: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    background-color: #2f3136;
+    border-radius: 8px;
+    padding: 0.5rem;
+}
+#other-fans-container h3 {
+    padding: 0.5rem;
+    margin: 0;
+    border-bottom: 1px solid #4f545c;
+    font-size: 1rem;
+    flex-shrink: 0;
+}
+#other-fans-list {
+    flex-grow: 1;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    padding: 0.5rem; 
+}
+.other-fan-item {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    background-color: #40444b;
+    padding: 0.5rem;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.2s;
+    position: relative;
+}
+.other-fan-item:hover {
+    background-color: #4f545c;
+}
+.other-fan-pfp {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    object-fit: cover;
+    flex-shrink: 0;
+}
+.other-fan-name {
+    flex-grow: 1;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    font-size: 0.9rem;
+}
+.other-fan-item .guess-tag {
+    position: static; 
+    transform: none;
+    flex-shrink: 0;
+}
+
+
+/* 게임 종료 모달 스타일 */
 .game-over-content {
     background-color: #36393f;
     color: #dcddde;
