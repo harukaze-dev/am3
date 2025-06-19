@@ -1,58 +1,263 @@
 <!DOCTYPE html>
-<html lang="ko">
+<html>
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>온라인 게임 포털</title>
-    <link rel="stylesheet" href="/style.css">
+    <title>오픈채팅</title>
+    <link rel="stylesheet" href="/common.css" />
+    <link id="mode-stylesheet" rel="stylesheet" href="" />
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&display=swap" rel="stylesheet">
 </head>
 <body>
-    <div class="main-container">
-        <h1>플레이할 게임을 선택하세요.</h1>
-        <p></p>
-        <div class="game-selection">
-            <!-- 1행 -->
-            <a href="/01.average-game" class="game-card">
-                <h2>XX평</h2>
-                <p>참가자들이 쓴 숫자의 평균에 가장 가까운 사람이 승리하는 심리 게임!</p>
-            </a>
-            <a href="/02.minority-game" class="game-card">
-                <h2>소수결 게임!</h2>
-                <p>두 가지 선택지 중, 더 적은 사람이 선택한 쪽이 승리하는 눈치 게임!</p>
-            </a>
-            <a href="/03.word-mafia" class="game-card">
-                <h2>워드 마피아</h2>
-                <p>나만 다른 단어? 정체를 숨기고 시민인 척하는 마피아를 찾아내는 추리 게임!</p>
-            </a>
-            
-            <!-- 2행 -->
-            <a href="/04.grid-game" class="game-card">
-                <h2>순발력 게임</h2>
-                <p>룰렛, 주사위, 예측불허의 심리전! 어떤 결과가 나올지 아무도 모릅니다.</p>
-            </a>
-            <a href="/05.led-game" class="game-card">
-                <h2>LED 게임</h2>
-                <p>빛과 색의 향연 속에서 펼쳐지는 눈치와 순발력의 대결!</p>
-            </a>
-            <a href="/06.text-game" class="game-card">
-                <h2>문장퍼즐게임</h2>
-                <p>알록달록한 퍼즐판에 숨겨진 문장을 가장 먼저 찾아내는 추리 게임!</p>
-            </a>
+    <div id="toast-popup" class="hidden">코드 복사 완료!</div>
+    <div id="main-menu">
+        <div class="lobby-header">
+            <h1>채팅에 참여하세요</h1>
+            <p>모드를 선택하고 새로운 방을 만들거나 코드로 참여하세요.</p>
+        </div>
+        <div class="form-group mode-selection">
+            <p class="form-label">게임 모드 선택</p>
+            <div class="role-selection">
+                 <input type="radio" name="game-mode" value="fakefan" id="mode-fakefan" checked>
+                 <label for="mode-fakefan" class="role-label">👻 가짜팬 찾기</label>
+                 <input type="radio" name="game-mode" value="guess_group"id="mode-guess-group">
+                 <label for="mode-guess-group" class="role-label">🕵️‍♂️ 팬덤 맞추기</label>
+            </div>
+        </div>
+        <button id="create-room-btn" class="main-menu-btn">새로운 방 만들기</button>
+        <div class="divider">또는</div>
+        <div id="join-form">
+            <input id="room-code-input" type="password" placeholder="초대 코드를 입력하세요" autocomplete="off" maxlength="6">
+            <button id="join-room-btn">코드로 참여하기</button>
+        </div>
+    </div>
+    <div id="profile-setup" class="hidden">
+        <div class="lobby-header">
+            <h1 id="profile-setup-title">프로필 설정</h1>
+            <p>당신의 역할과 닉네임을 정해주세요.</p>
+        </div>
+        <div class="form-group role-selection">
+            <input type="radio" name="role" value="fan" id="role-fan" checked>
+            <label for="role-fan" class="role-label">💖 팬</label>
+            <input type="radio" name="role" value="streamer" id="role-streamer">
+            <label for="role-streamer" class="role-label">🎮 스트리머</label>
+        </div>
+        <div id="streamer-options" class="form-group hidden">
+            <select id="streamer-select"></select>
+        </div>
+        <div id="streamer-key-group" class="form-group hidden">
+            <input id="streamer-key-input" type="password" placeholder="스트리머 인증 키를 입력하세요" autocomplete="off">
+        </div>
+        <div id="fan-options" class="form-group">
+            <select id="fan-group-select"></select>
+            <select id="fan-tier-select"></select>
+        </div>
+        <div class="profile-preview-container">
+            <img id="profile-preview" src="" alt="Profile Preview">
+        </div>
+        <div class="form-group" id="nickname-group">
+            <input id="nickname-input" type="text" placeholder="닉네임을 입력하세요" autocomplete="off" required>
+        </div>
+        <button id="confirm-profile-btn">입장하기</button>
+        <button id="back-to-lobby-btn" class="secondary-btn">뒤로가기</button>
+    </div>
 
-            <!-- 3행 -->
-            <a href="/07.indian-poker" class="game-card">
-                <h2>양세찬게임</h2>
-                <p>내 머리 위에 붙은 카드는 무엇일까? 다른 사람의 카드를 보고 내 정체를 추리하는 파티 게임!</p>
-            </a>
-            <!-- [추가] 포켓몬게임 카드 추가 -->
-            <a href="/08.pokemon-game" class="game-card">
-                <h2>포켓몬 퀴즈</h2>
-                <p>설명을 듣고 어떤 포켓몬인지 맞춰보세요! 가장 빠른 사람이 승리합니다.</p>
-            </a>
-            <div class="game-card disabled">
-                <h2>개발중...</h2>
+    <div id="chat-container" class="hidden">
+        <!-- '가짜팬 찾기' 모드용 멀티 채팅 뷰 -->
+        <div id="multi-chat-view" class="hidden">
+            <div class="chat-column" id="chat-column-yeonri" data-streamer-id="yeonri">
+                <div class="chat-column-header streamer-yeonri">
+                    <div class="column-title"><img src="/images/streamer_yeonri.png" alt="연리"><span>연리-연밥 채널</span></div>
+                    <div class="header-controls-right">
+                        <!-- [수정] 새로운 볼륨 조절 UI 구조 -->
+                        <div class="volume-control-container hidden">
+                            <button class="volume-btn">
+                                🔊
+                                <div class="vertical-slider-container">
+                                    <input type="range" class="volume-slider-vertical" min="0" max="1" step="0.1" value="1">
+                                </div>
+                            </button>
+                        </div>
+                        <div class="settings-container">
+                            <button class="header-btn column-settings-btn">☰</button>
+                            <div class="settings-menu hidden">
+                                <button class="menu-copy-code-btn">📋 코드 복사</button>
+                                <button class="menu-leave-room-btn danger">🚪 방 나가기</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <ul class="messages" id="messages-yeonri"></ul>
+                <form class="chat-form hidden" data-groupid="yeonri">
+                    <button type="button" class="end-round-btn">라운드 종료</button>
+                    <input type="text" autocomplete="off" placeholder="메시지 입력..." />
+                    <button type="submit">전송</button>
+                </form>
+                <div class="column-resize-handle"></div>
+            </div>
+            <div class="chat-column" id="chat-column-morara" data-streamer-id="morara">
+                <div class="chat-column-header streamer-morara">
+                    <div class="column-title"><img src="/images/streamer_morara.png" alt="모라라"><span>모라라-코랄단 채널</span></div>
+                    <div class="header-controls-right">
+                        <div class="volume-control-container hidden">
+                            <button class="volume-btn">
+                                🔊
+                                <div class="vertical-slider-container">
+                                    <input type="range" class="volume-slider-vertical" min="0" max="1" step="0.1" value="1">
+                                </div>
+                            </button>
+                        </div>
+                        <div class="settings-container">
+                            <button class="header-btn column-settings-btn">☰</button>
+                            <div class="settings-menu hidden">
+                                <button class="menu-copy-code-btn">📋 코드 복사</button>
+                                <button class="menu-leave-room-btn danger">🚪 방 나가기</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <ul class="messages" id="messages-morara"></ul>
+                <form class="chat-form hidden" data-groupid="morara">
+                    <button type="button" class="end-round-btn">라운드 종료</button>
+                    <input type="text" autocomplete="off" placeholder="메시지 입력..." />
+                    <button type="submit">전송</button>
+                </form>
+                <div class="column-resize-handle"></div>
+            </div>
+            <div class="chat-column" id="chat-column-haeblin" data-streamer-id="haeblin">
+                <div class="chat-column-header streamer-haeblin">
+                    <div class="column-title"><img src="/images/streamer_haeblin.png" alt="해블린"><span>해블린-디그단 채널</span></div>
+                    <div class="header-controls-right">
+                        <div class="volume-control-container hidden">
+                            <button class="volume-btn">
+                                🔊
+                                <div class="vertical-slider-container">
+                                    <input type="range" class="volume-slider-vertical" min="0" max="1" step="0.1" value="1">
+                                </div>
+                            </button>
+                        </div>
+                        <div class="settings-container">
+                            <button class="header-btn column-settings-btn">☰</button>
+                            <div class="settings-menu hidden">
+                                <button class="menu-copy-code-btn">📋 코드 복사</button>
+                                <button class="menu-leave-room-btn danger">🚪 방 나가기</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <ul class="messages" id="messages-haeblin"></ul>
+                <form class="chat-form hidden" data-groupid="haeblin">
+                    <button type="button" class="end-round-btn">라운드 종료</button>
+                    <input type="text" autocomplete="off" placeholder="메시지 입력..." />
+                    <button type="submit">전송</button>
+                </form>
+                <div class="column-resize-handle"></div>
+            </div>
+        </div>
+
+        <!-- '팬덤 맞추기' 모드용 단일 채팅 뷰 -->
+        <div id="single-chat-view" class="hidden">
+            <div id="chat-wrapper">
+                <div id="chat-header">
+                    <button id="manage-players-btn" class="header-btn hidden">👥 플레이어 관리</button>
+                    <h3 id="chat-room-title">채팅방</h3>
+                    <div class="header-controls-right">
+                        <div class="volume-control-container hidden">
+                            <button class="volume-btn">
+                                🔊
+                                <div class="vertical-slider-container">
+                                    <input type="range" class="volume-slider-vertical" min="0" max="1" step="0.1" value="1">
+                                </div>
+                            </button>
+                        </div>
+                        <div class="settings-container">
+                            <button id="settings-btn" class="header-btn">☰ 설정</button>
+                            <div id="settings-menu" class="settings-menu hidden">
+                                <button class="menu-copy-code-btn">📋 코드 복사</button>
+                                <button class="menu-leave-room-btn danger">🚪 방 나가기</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <ul id="messages" class="messages"></ul>
+                <form id="form" action="">
+                    <button type="button" class="end-round-btn">라운드 종료</button>
+                    <input id="input" autocomplete="off" placeholder="메시지를 입력하세요..." /><button type="submit">전송</button>
+                </form>
             </div>
         </div>
     </div>
+
+    <!-- Modals (수정 없음) -->
+    <div id="channel-participants-modal" class="modal-overlay hidden">
+        <div class="modal-content">
+            <h2 id="channel-participants-title">채널 참가자 목록</h2>
+            <div id="channel-participants-list"></div>
+            <button id="channel-participants-modal-close" class="modal-close-btn">×</button>
+        </div>
+    </div>
+    <div id="private-guess-modal" class="modal-overlay hidden">
+        <div class="private-guess-content">
+            <div class="private-guess-left">
+                <h3>정체 맞추기</h3>
+                <div id="private-guess-target-info"></div>
+                <div id="private-guess-options-container"></div>
+                <div id="private-guess-admin-controls" class="hidden">
+                    <button id="private-kick-btn" class="kick-btn">이 플레이어 내보내기</button>
+                </div>
+            </div>
+            <div class="private-guess-right">
+                <h3>대화 기록</h3>
+                <div class="modal-right-content-wrapper">
+                    <ul id="private-chat-log" class="messages"></ul>
+                    <div id="other-fans-container">
+                        <h3>같은 채널 팬</h3>
+                        <div id="other-fans-list"></div>
+                    </div>
+                </div>
+            </div>
+            <button id="private-guess-modal-close" class="modal-close-btn">×</button>
+        </div>
+    </div>
+    <div id="manage-players-modal" class="modal-overlay hidden">
+        <div class="modal-content">
+            <h2>플레이어 관리</h2>
+            <p>플레이어를 클릭하여 내보내거나 정체를 추리할 수 있습니다.</p>
+            <div id="player-list-container"></div>
+            <button id="manage-players-modal-close" class="modal-close-btn">×</button>
+        </div>
+    </div>
+    <div id="guess-group-modal" class="modal-overlay hidden">
+        <div class="guess-group-content">
+            <div class="guess-group-left">
+                <h3>팬덤 맞추기</h3>
+                <div id="guess-group-target-info"></div>
+                <div class="modal-buttons">
+                    <button class="guess-group-btn" data-group="yeonbab"><img src="" alt="연밥"><span>연밥</span></button>
+                    <button class="guess-group-btn" data-group="coral"><img src="" alt="코랄단"><span>코랄단</span></button>
+                    <button class="guess-group-btn" data-group="digdan"><img src="" alt="디그단"><span>디그단</span></button>
+                </div>
+                <div id="fandom-guess-admin-controls" class="hidden">
+                    <button id="fandom-kick-btn" class="kick-btn">이 플레이어 내보내기</button>
+                </div>
+            </div>
+            <div class="guess-group-right">
+                <h3>대화 기록</h3>
+                <ul id="guess-group-chat-log" class="messages"></ul>
+            </div>
+            <button id="guess-group-modal-close" class="modal-close-btn">×</button>
+        </div>
+    </div>
+    <div id="game-over-modal" class="modal-overlay hidden">
+        <div class="game-over-content">
+            <div class="game-over-header"><h1>🎉 게임 종료! 🎉</h1></div>
+            <div id="game-over-body"></div>
+            <button id="game-over-close-btn" class="main-menu-btn">확인</button>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/sortablejs@latest/Sortable.min.js"></script>
+    <script src="/socket.io/socket.io.js"></script>
+    <script src="/client.js"></script>
 </body>
 </html>

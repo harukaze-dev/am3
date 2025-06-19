@@ -18,7 +18,8 @@ let isGameOver = false;
 let currentVolume = 1.0; // 사운드 및 TTS 볼륨. 0.0 ~ 1.0.
 let lastVolumeBeforeMute = 1.0; // 음소거 직전 볼륨을 저장
 let ttsVoices = []; // 사용 가능한 TTS 목소리 목록
-const fandomVoiceMap = {}; // 팬덤별 목소리 매핑 객체
+const ttsQueue = []; // TTS 요청을 순차적으로 처리하기 위한 큐
+let isProcessingTTS = false; // TTS 큐가 현재 처리 중인지 여부를 나타내는 잠금 변수
 
 // 게임 모드 이름 매핑
 const gameModeNames = {
@@ -93,70 +94,86 @@ let sortable = null;
 let resizingColumn = null;
 
 /**
- * [수정] 브라우저 TTS 기능을 안정적으로 초기화하고 목소리를 할당하는 함수.
- * 음성 목록이 이미 로드되었으면 즉시 할당하고, 그렇지 않으면 로드될 때까지 기다립니다.
+ * 브라우저 TTS 기능을 안정적으로 초기화하는 함수.
  */
 function initializeTTS() {
-    // 실제 목소리를 할당하는 함수
     const assignVoices = () => {
-        // 사용 가능한 모든 목소리 가져오기
         ttsVoices = window.speechSynthesis.getVoices();
-        // 한국어 목소리만 필터링
-        const koreanVoices = ttsVoices.filter(voice => voice.lang === 'ko-KR');
-        
-        // 게임 설정이 있고 한국어 목소리가 하나 이상 있을 때
-        if (gameConfig && koreanVoices.length > 0) {
-            // 각 스트리머의 팬덤에 한국어 목소리를 순환 할당
-            gameConfig.streamers.forEach((streamer, index) => {
-                fandomVoiceMap[streamer.fandom.id] = koreanVoices[index % koreanVoices.length];
-            });
-            console.log("TTS voices loaded and mapped:", fandomVoiceMap);
-        } else if (koreanVoices.length === 0) {
-            // 한국어 목소리가 없을 경우 경고 메시지 출력
-            console.warn("No Korean (ko-KR) TTS voices found. TTS will use the default voice.");
+        if (ttsVoices.length > 0) {
+            console.log("TTS voices loaded.");
+            if (!ttsVoices.some(voice => voice.lang === 'ko-KR')) {
+                 console.warn("No Korean (ko-KR) TTS voices found. TTS will use the default voice.");
+            }
         }
     };
-
-    // 브라우저의 음성 목록이 이미 로드되어 있는지 확인
     if (window.speechSynthesis.getVoices().length > 0) {
-        // 이미 로드되었다면 즉시 목소리 할당 함수 호출
         assignVoices();
     } else {
-        // 아직 로드되지 않았다면, 'voiceschanged' 이벤트가 발생했을 때 할당 함수를 호출하도록 설정
-        // 이 방법은 TTS 기능의 불안정한 초기화 문제를 해결합니다.
         window.speechSynthesis.onvoiceschanged = assignVoices;
     }
 }
 
+/**
+ * [수정] TTS 큐를 안정적으로 처리하고 타이밍 문제를 해결한 함수.
+ */
+function processTTSQueue() {
+    if (ttsQueue.length === 0) {
+        isProcessingTTS = false;
+        return;
+    }
+
+    isProcessingTTS = true;
+    const toSpeak = ttsQueue.shift();
+    const utterance = new SpeechSynthesisUtterance(toSpeak.text);
+    
+    const speakingElement = toSpeak.messageElement;
+
+    const selectedVoice = ttsVoices.find(voice => voice.lang === 'ko-KR');
+    if (selectedVoice) {
+        utterance.voice = selectedVoice;
+    }
+    utterance.volume = currentVolume;
+    
+    // [핵심 수정] setTimeout을 사용하여 브라우저 렌더링 후 클래스를 추가합니다.
+    // 이렇게 하면 첫 메시지에서도 CSS transition 효과가 정상적으로 적용됩니다.
+    setTimeout(() => {
+        if (speakingElement) {
+            speakingElement.classList.add('speaking');
+        }
+    }, 0);
+
+    utterance.onend = () => {
+        if (speakingElement) {
+            speakingElement.classList.remove('speaking');
+        }
+        processTTSQueue();
+    };
+
+    utterance.onerror = (event) => {
+        console.error('TTS Error:', event);
+        if (speakingElement) {
+            speakingElement.classList.remove('speaking');
+        }
+        processTTSQueue();
+    };
+    
+    window.speechSynthesis.speak(utterance);
+}
 
 /**
- * 텍스트를 음성으로 변환하여 재생(TTS)하는 함수. 볼륨을 적용합니다.
+ * 텍스트를 음성으로 변환하도록 큐에 요청을 추가하는 함수.
  * @param {string} text - 읽어줄 텍스트.
- * @param {string} fanGroup - 팬의 소속 팬덤 ID. 이 값에 따라 목소리가 결정됩니다.
+ * @param {string} fanGroup - 팬의 소속 팬덤 ID.
+ * @param {HTMLElement} messageElement - 강조 효과를 적용할 메시지 DOM 요소 객체
  */
-function speak(text, fanGroup) {
-    if (currentVolume === 0) return; // 볼륨이 0이면 재생하지 않음
+function speak(text, fanGroup, messageElement) {
+    if (currentVolume === 0) return;
 
-    const utterance = new SpeechSynthesisUtterance(text);
-    let selectedVoice = null;
-
-    window.speechSynthesis.cancel(); // 이전에 재생 중이던 음성이 있다면 중단
-
-    // '가짜팬 찾기' 모드이고, 팬덤 그룹에 할당된 목소리가 있으면 해당 목소리 사용
-    if (currentMode === 'fakefan' && fanGroup && fandomVoiceMap[fanGroup]) {
-        selectedVoice = fandomVoiceMap[fanGroup];
-    } else {
-        // 그 외의 경우, 또는 할당된 목소리가 없는 경우 기본 한국어 목소리 탐색
-        selectedVoice = ttsVoices.find(voice => voice.lang === 'ko-KR');
+    ttsQueue.push({ text, fanGroup, messageElement });
+    
+    if (!isProcessingTTS) {
+        processTTSQueue();
     }
-
-    if (selectedVoice) {
-        utterance.voice = selectedVoice; // 찾은 목소리 설정
-    }
-
-    utterance.volume = currentVolume; // 현재 설정된 볼륨 적용
-
-    window.speechSynthesis.speak(utterance); // 음성 재생
 }
 
 /**
@@ -239,10 +256,9 @@ function updateColumnUIVisibility() {
             settingsContainer.classList.toggle('hidden', !belongsToChannel);
         }
         if (volumeContainer) {
-            volumeContainer.classList.toggle('hidden', !belongsToChannel);
+            volumeContainer.classList.toggle('hidden', currentUserData.role !== 'streamer' || !isMyChannel);
         }
         endRoundBtn.classList.toggle('hidden', !isMyChannel);
-
     });
 }
 
@@ -445,7 +461,7 @@ function showChatRoom() {
         chatContainer.className = 'single-view-active';
         multiChatView.classList.add('hidden');
         singleChatView.classList.remove('hidden');
-        singleChatView.querySelector('.volume-control-container').classList.remove('hidden');
+        singleChatView.querySelector('.volume-control-container').classList.toggle('hidden', currentUserData.role !== 'streamer');
         singleChatInput.focus();
         updateRoundEndButtons();
         const endRoundBtn = document.querySelector('#form .end-round-btn');
@@ -454,6 +470,8 @@ function showChatRoom() {
         }
     }
     setupSettingsMenus();
+
+    if (currentUserData.role !== 'streamer') return;
 
     document.querySelectorAll('.volume-btn').forEach(btn => {
         btn.textContent = currentVolume > 0 ? '🔊' : '🔇';
@@ -632,7 +650,7 @@ document.addEventListener('mouseup', () => {
 socket.on('server config', (config) => {
     gameConfig = config;
     initialize();
-    initializeTTS(); // [수정] 안정화된 TTS 초기화 함수 호출
+    initializeTTS(); 
 });
 
 socket.on('room mode response', ({ mode }) => {
@@ -719,7 +737,7 @@ socket.on('error message', (message) => {
 });
 
 /**
- * [수정] 채팅 메시지 수신 시 TTS 재생 범위를 제한하는 로직 추가
+ * 채팅 메시지 수신 시 TTS 재생 및 강조 효과를 처리하는 함수
  */
 function addChatMessage(data) {
     playSound('chat.MP3');
@@ -728,33 +746,27 @@ function addChatMessage(data) {
     const targetMessageList = document.getElementById(chatGroupId === 'main' ? 'messages' : `messages-${chatGroupId}`);
     if (!targetMessageList) return;
 
-    // [수정] TTS 재생 조건 추가
-    if (user.role === 'fan') {
+    // 메시지 li 요소를 생성합니다.
+    const item = document.createElement('li');
+
+    // TTS는 '스트리머' 역할의 사용자에게만, '팬'이 보낸 메시지에 한해 재생됩니다.
+    if (currentUserData.role === 'streamer' && user.role === 'fan') {
         let shouldSpeak = false;
+
         if (currentMode === 'guess_group') {
-            // '팬덤 맞추기' 모드에서는 모든 팬 메시지를 읽음
             shouldSpeak = true;
         } else if (currentMode === 'fakefan') {
-            // '가짜팬 찾기' 모드에서는 자신이 속한 채널의 메시지만 읽음
-            let myChannelId;
-            if (currentUserData.role === 'streamer') {
-                myChannelId = currentUserData.streamerId;
-            } else { // 팬인 경우
-                const myStreamer = gameConfig.streamers.find(s => s.fandom.id === currentUserData.fanGroup);
-                myChannelId = myStreamer?.id;
-            }
-            // 메시지가 발생한 채널 ID와 나의 채널 ID가 같으면 재생
-            if (chatGroupId === myChannelId) {
+            if (chatGroupId === currentUserData.streamerId) {
                 shouldSpeak = true;
             }
         }
 
         if (shouldSpeak) {
-            speak(message, user.fanGroup);
+            // speak 함수에 메시지 DOM 요소 객체를 직접 전달합니다.
+            speak(message, user.fanGroup, item);
         }
     }
 
-    const item = document.createElement('li');
     item.dataset.userId = user.id;
     item.dataset.userRole = user.role;
     const liClasses = ['message-item'];
@@ -803,11 +815,13 @@ function addChatMessage(data) {
     messageBubbleDiv.className = 'message-bubble';
     messageBubbleDiv.innerHTML = `<p class="chat-message-text">${message}</p>`;
 
-    if (user.role === 'fan') {
+    // 메시지 버블 클릭 TTS 기능도 스트리머에게만 제공합니다.
+    if (user.role === 'fan' && currentUserData.role === 'streamer') {
         messageBubbleDiv.style.cursor = 'pointer';
         messageBubbleDiv.dataset.fanGroup = user.fanGroup;
         messageBubbleDiv.addEventListener('click', () => {
-            speak(message, messageBubbleDiv.dataset.fanGroup);
+            // 클릭 시에도 DOM 요소 객체를 전달하여 강조 효과를 적용합니다.
+            speak(message, user.fanGroup, item);
         });
     }
 
@@ -1151,11 +1165,11 @@ function openPrivateGuessModal(targetUser, chatGroupId) {
     sourceMessages.forEach(msgLi => {
         if (msgLi.dataset.userId === targetUser.id || msgLi.dataset.userId === currentUserData.id) {
             const clonedItem = msgLi.cloneNode(true);
-            if (msgLi.dataset.userRole === 'fan') {
+            if (msgLi.dataset.userRole === 'fan' && currentUserData.role === 'streamer') {
                 const messageBubble = clonedItem.querySelector('.message-bubble');
                 const messageText = messageBubble.querySelector('p').textContent;
                 messageBubble.style.cursor = 'pointer';
-                messageBubble.addEventListener('click', () => speak(messageText, msgLi.querySelector('.message-bubble').dataset.fanGroup));
+                messageBubble.addEventListener('click', () => speak(messageText, msgLi.querySelector('.message-bubble').dataset.fanGroup, clonedItem));
             }
             privateChatLog.appendChild(clonedItem);
         }

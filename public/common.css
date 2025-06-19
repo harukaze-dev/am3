@@ -1,3 +1,5 @@
+/* public/common.css */
+
 /* --- 기본 & 폰트 설정 --- */
 :root {
   --primary-color: #5a67d8;
@@ -179,7 +181,15 @@ select:focus, #nickname-input:focus { outline: none; border-color: var(--primary
 .streamer-yeonri .chat-nickname, .fan-group-yeonbab .chat-nickname { background-color: var(--yeonri-color); color: white; border-color: var(--yeonri-color); text-shadow: 0px 1px 2px rgba(0,0,0,0.5); }
 .streamer-morara .chat-nickname, .fan-group-coral .chat-nickname { background-color: var(--morara-color); color: white; border-color: var(--morara-color); text-shadow: 0px 1px 2px rgba(0,0,0,0.5); }
 
-.message-bubble { position: relative; border-radius: 14px; padding: 8px 14px; background: linear-gradient(to bottom, #e4e6eb, #f0f2f5); box-shadow: 0 0 0 4px white, 0 1px 2px rgba(0, 0, 0, 0.15); }
+.message-bubble {
+    position: relative;
+    border-radius: 14px;
+    padding: 8px 14px;
+    background: linear-gradient(to bottom, #e4e6eb, #f0f2f5);
+    box-shadow: 0 0 0 4px white, 0 1px 2px rgba(0, 0, 0, 0.15);
+    /* [수정] 강조 효과를 위한 transition 추가 */
+    transition: box-shadow 0.3s ease-in-out, transform 0.3s ease-in-out;
+}
 .chat-message-text { margin: 0; font-size: 1em; line-height: 1.45; word-wrap: break-word; color: #333; }
 .streamer-message .chat-message-text { color: #ffffff; text-shadow: 0px 1px 2px rgba(0, 0, 0, 0.6); }
 .message-bubble::before { content: ""; position: absolute; top: 50%; transform: translateY(-50%); width: 0; height: 0; border-style: solid; }
@@ -243,21 +253,20 @@ select:focus, #nickname-input:focus { outline: none; border-color: var(--primary
     transform: none; 
 }
 
-/* [수정] 볼륨 조절 UI 스타일 */
+/* 볼륨 조절 UI 스타일 */
 .volume-btn {
-    position: relative; /* 자식인 슬라이더 컨테이너의 기준점 */
+    position: relative;
     background: none;
     border: none;
     font-size: 1.2rem;
     cursor: pointer;
     color: white;
-    padding: 0.5rem; /* 호버 영역을 넓히기 위해 패딩 추가 */
+    padding: 0.5rem;
     line-height: 1;
 }
 .vertical-slider-container {
     display: none; 
     position: absolute;
-    /* [수정] 아이콘 아래에 나타나도록 top 속성 사용하고 간격 추가 */
     top: calc(100% + 5px); 
     left: 50%;
     transform: translateX(-50%);
@@ -267,27 +276,24 @@ select:focus, #nickname-input:focus { outline: none; border-color: var(--primary
     box-shadow: 0 2px 10px rgba(0,0,0,0.3);
     z-index: 1200; 
 }
-/* [수정] 버튼에 호버했을 때 자식 슬라이더가 보이도록 함 */
 .volume-btn:hover .vertical-slider-container {
     display: block; 
 }
 .volume-slider-vertical {
     -webkit-appearance: none;
     appearance: none;
-    /* [수정] 세로 모양을 위해 width와 height를 교체 */
     width: 8px; 
     height: 100px; 
     background: #5c677d;
     outline: none;
     border-radius: 3px;
-    /* [수정] 슬라이더를 세로로 만듦 (브라우저 호환성 고려) */
     -webkit-writing-mode: vertical-bt;
     writing-mode: vertical-bt; 
 }
 .volume-slider-vertical::-webkit-slider-thumb {
     -webkit-appearance: none;
     appearance: none;
-    width: 18px; /* 세로에 맞게 크기 조정 */
+    width: 18px;
     height: 18px;
     background: #ffffff;
     cursor: pointer;
@@ -301,4 +307,14 @@ select:focus, #nickname-input:focus { outline: none; border-color: var(--primary
     cursor: pointer;
     border-radius: 50%;
     border: 1px solid #b9bbbe;
+}
+
+/* --- [추가] TTS 재생 중인 메시지 강조 스타일 --- */
+.message-item.speaking .message-bubble {
+    /* 현재 재생 중인 말풍선에 노란색 네온 효과 적용 */
+    box-shadow: 0 0 5px #fff,
+                0 0 10px #fff,
+                0 0 20px #ffdd00,
+                0 0 35px #ffdd00;
+    transform: scale(1.02); /* 약간 확대하여 주목도 상승 */
 }
