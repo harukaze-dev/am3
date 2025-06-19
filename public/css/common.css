@@ -1,0 +1,477 @@
+/*
+ * ===================================================================
+ *  공통 스타일시트 (common.css)
+ * ===================================================================
+ */
+
+/* --- 1. 전역 설정 및 변수 --- */
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;700&family=Noto+Sans+KR:wght@400;700&display=swap');
+
+html {
+    box-sizing: border-box;
+}
+*, *:before, *:after {
+    box-sizing: inherit;
+}
+
+:root {
+    --accent-color: #FFC107;
+    --mint-color: #4db6ac;
+    --primary-color: #3f51b5;
+    --light-bg: #f5f7fa;
+    --dark-text: #333;
+}
+
+/* --- 2. 기본 레이아웃 및 공통 스타일 --- */
+body { 
+    font-family: 'Poppins', 'Noto Sans KR', sans-serif;
+    background: linear-gradient(135deg, #e0f7fa, #e8f5e9);
+    color: var(--dark-text);
+    margin: 0;
+    padding: 0; 
+    min-height: 100vh;
+}
+
+body.in-lobby {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 1rem;
+}
+
+#app-wrapper {
+    width: 100%;
+    max-width: 1400px;
+    padding: 70px 1rem 1rem 1rem; 
+    margin: 0 auto;
+}
+
+.hidden {
+    display: none !important;
+}
+
+
+/* --- 3. 토스트 알림 및 애니메이션 --- */
+#toast-container {
+    position: fixed;
+    top: 80px;
+    right: 20px;
+    z-index: 1002;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.toast {
+    padding: 12px 20px;
+    border-radius: 8px;
+    color: white;
+    font-weight: bold;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+    animation: slideInRight 0.3s ease-out forwards;
+}
+
+.toast.fade-out { animation: slideOutRight 0.5s ease-in forwards; }
+.toast.info { background-color: #2196F3; }
+.toast.join { background-color: #4CAF50; }
+.toast.leave { background-color: #f44336; }
+
+@keyframes slideInRight {
+    from { transform: translateX(100%); opacity: 0; }
+    to { transform: translateX(0); opacity: 1; }
+}
+
+@keyframes slideOutRight {
+    to { transform: translateX(100%); opacity: 0; }
+}
+
+
+/* --- 4. 로비 화면 공통 스타일 --- */
+.lobby-container {
+    text-align: center;
+    animation: fadeIn 0.5s;
+    background: rgba(255, 255, 255, 0.7);
+    padding: 2rem;
+    border-radius: 24px;
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    max-width: 600px;
+    margin: auto;
+    width: 100%;
+}
+
+.lobby-container h1 {
+    color: var(--primary-color);
+    font-size: 2.5rem;
+    text-shadow: none;
+}
+
+.lobby-step { margin-top: 2rem; }
+
+.lobby-step h2 {
+    color: #555;
+    font-size: 1.2rem;
+    margin-bottom: 1rem;
+    border-bottom: 1px solid rgba(0,0,0,0.1);
+    padding-bottom: 0.5rem;
+}
+
+.lobby-profile-container {
+    margin-bottom: 1rem;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+
+.lobby-profile-container p {
+    font-size: 0.9rem;
+    color: #666;
+    margin-top: 0.5rem;
+}
+
+#lobby-profile-preview {
+    width: 120px;
+    height: 120px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 4px solid rgba(0,0,0,0.1);
+    cursor: pointer;
+}
+
+#room-actions { display: flex; gap: 1.5rem; margin-top: 2rem; animation: fadeIn 0.5s; }
+.action-box { flex: 1; background: rgba(0,0,0,0.05); padding: 1.5rem; border-radius: 16px; }
+.action-box h3 { margin-top: 0; color: #444; }
+
+#player-name-input, #room-code-input {
+    width: 100%;
+    padding: 0.8rem;
+    font-size: 1.1rem;
+    border-radius: 8px;
+    border: 1px solid #ddd;
+    box-sizing: border-box;
+    background-color: #fff;
+    color: var(--dark-text);
+    text-align: center;
+}
+
+#room-actions button {
+    width: 100%;
+    padding: 0.8rem;
+    font-size: 1.2rem;
+    font-weight: bold;
+    background-color: var(--accent-color);
+    color: var(--dark-text);
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    margin-top: 1rem;
+}
+
+#room-actions button:hover { transform: translateY(-2px); box-shadow: 0 4px 10px rgba(0,0,0,0.2); }
+
+
+/* --- 5. 게임 컨테이너 및 상단 UI 공통 스타일 --- */
+.container {
+    background: var(--light-bg);
+    padding: 2rem;
+    border-radius: 24px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+    color: var(--dark-text);
+    animation: fadeIn 0.5s;
+}
+
+#player-count-container { display: flex; justify-content: flex-start; margin-bottom: 1rem; }
+#top-bar { display: flex; justify-content: space-between; align-items: center; gap: 1rem; padding-bottom: 1rem; margin-bottom: 1rem; border-bottom: 1px solid #e0e0e0; flex-wrap: wrap; }
+.top-bar-left, .top-bar-right { display: flex; align-items: center; gap: 0.75rem; flex-shrink: 0; }
+.top-bar-left { justify-content: flex-start; }
+.top-bar-right { justify-content: flex-end; }
+.top-bar-title { flex-grow: 1; text-align: center; color: var(--primary-color); margin: 0; font-size: 2.5rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.info-box { padding: 0.5rem 1rem; font-size: 1rem; font-family: 'Poppins', 'Noto Sans KR', sans-serif; border-radius: 8px; font-weight: bold; background-color: #eceff1; color: #37474f; }
+#host-controls { display: flex; gap: 0.75rem; }
+#host-controls button, #copy-code-btn { padding: 0.5rem 1rem; font-size: 1rem; font-family: 'Poppins', 'Noto Sans KR', sans-serif; border-radius: 8px; border: none; cursor: pointer; transition: all 0.3s ease; font-weight: bold; white-space: nowrap; }
+#copy-code-btn, #reset-round-button, #view-results-button:not(:disabled) { background-color: var(--mint-color); color: white; }
+#view-results-button:disabled { background-color: #ccc; cursor: not-allowed; color: #666; }
+
+/* --- 6. 메인 게임 영역 (플레이어 카드) 공통 스타일 --- */
+#main-game-area { display: flex; gap: 2rem; align-items: stretch }
+#game-board { flex: 3; display: grid; grid-template-columns: 1fr; gap: 1rem; min-width: 0; }
+
+.player-card {
+    background-color: #ffffff;
+    border-radius: 16px;
+    padding: 1rem;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+    border-left: 8px solid;
+    box-sizing: border-box;
+    transition: all 0.3s ease-out;
+    display: grid;
+    grid-template-columns: 60px 1fr;
+    gap: 1.5rem;
+    align-items: center;
+}
+
+.player-card.submitted { border-right: 8px solid; background-color: var(--tint-color); }
+.profile-section { grid-column: 1 / 2; }
+.content-section { grid-column: 2 / 3; display: grid; grid-template-columns: 1fr auto; align-items: center; min-width: 0; gap: 1rem; }
+.profile-image-preview { width: 60px; height: 60px; border-radius: 50%; object-fit: cover; border: 3px solid white; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+.player-info-text { display: flex; flex-direction: column; align-items: flex-start; justify-content: center; min-width: 0; }
+.player-name { font-size: 1.5rem; font-weight: bold; text-align: left; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.player-status-display { grid-column: 2 / 3; font-size: 2.2rem; font-weight: bold; color: #aaa; text-align: right; }
+
+/* --- 7. 사이드 패널 (랭킹 & 히스토리) 공통 스타일 --- */
+#side-panel-container {
+    flex: 1;
+    min-width: 280px;
+    background: white;
+    border-radius: 16px;
+    padding: 1.5rem;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+    align-self: stretch;
+    display: flex;
+    flex-direction: column;
+}
+
+.side-panel-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; }
+#side-panel-title { margin: 0; color: var(--primary-color); font-size: 1.3rem; }
+#toggle-history-btn { background: #f1f3f5; border: none; padding: 0.4rem 0.8rem; border-radius: 6px; font-size: 0.9rem; font-weight: bold; cursor: pointer; color: #495057; }
+#ranking-board ol, #history-board ol { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 0.8rem; overflow-y: auto; max-height: 400px; }
+#ranking-board li, #history-board li { display: flex; align-items: center; gap: 1rem; padding: 0.5rem; border-radius: 8px; transition: background-color 0.2s, border-left-color 0.2s; border-left: 5px solid transparent; }
+#history-board li { cursor: pointer; font-weight: bold; color: #555; background-color: #f9f9f9; border-left: 5px solid #ccc; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+#history-board li:hover { background-color: #e9ecef; border-left-color: var(--primary-color); }
+#ranking-board li.first-place { border-left-color: var(--rank-color, #FFD700); background-color: #f0f8ff; font-weight: bold; }
+#ranking-board .rank { font-size: 1.2rem; font-weight: bold; color: #888; width: 25px; text-align: center; }
+#ranking-board li.first-place .rank { color: var(--rank-color, #333); }
+#ranking-board .profile-image-rank { width: 40px; height: 40px; border-radius: 50%; object-fit: cover; }
+#ranking-board .name {
+    flex-grow: 1;
+    font-weight: bold;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    min-width: 0;
+}
+#ranking-board .score {
+    margin-left: auto;
+    padding-left: 1rem;
+    flex-shrink: 0;
+}
+
+
+/* --- 8. 라운드 결과 화면 공통 스타일 --- */
+#results { display: flex; gap: 2rem; align-items: flex-start; }
+.result-header { display: flex; justify-content: space-between; align-items: center; gap: 1rem; margin-bottom: 0.5rem; }
+#back-to-game-btn { background: var(--primary-color); color: white; border: none; padding: 0.6rem 1.2rem; font-size: 1rem; font-weight: bold; border-radius: 8px; cursor: pointer; flex-shrink: 0; }
+#result-summary { flex: 1; background: white; padding: 2rem; border-radius: 16px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); text-align: center; }
+#result-summary h2 { color: var(--primary-color); font-size: 1.8rem; margin: 0; flex-grow: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.player-info { display: flex; align-items: center; gap: 15px; }
+.profile-image-result { width: 60px; height: 60px; border-radius: 50%; object-fit: cover; }
+
+/* --- 9. 상단 네비게이션 바 스타일 --- */
+.game-nav {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    background-color: rgba(255, 255, 255, 0.9);
+    backdrop-filter: blur(10px);
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    padding: 0 1rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    height: 60px;
+    z-index: 1001;
+}
+
+.nav-home-button {
+    font-size: 1.2rem;
+    font-weight: bold;
+    color: var(--primary-color, #3f51b5);
+    text-decoration: none;
+    transition: transform 0.2s;
+    flex-shrink: 0;
+}
+
+.nav-home-button:hover { transform: scale(1.05); }
+
+.nav-links { 
+    display: flex; 
+    gap: 1.5rem; 
+}
+
+.nav-link {
+    font-size: 1rem;
+    font-weight: 500;
+    color: #555;
+    text-decoration: none;
+    padding: 0.5rem 0;
+    position: relative;
+    transition: color 0.2s;
+}
+
+.nav-link:hover { color: #000; }
+.nav-link::after {
+    content: '';
+    position: absolute;
+    width: 100%;
+    height: 3px;
+    background-color: var(--mint-color, #4db6ac);
+    bottom: 0;
+    left: 0;
+    transform: scaleX(0);
+    transform-origin: bottom right;
+    transition: transform 0.3s ease-out;
+}
+
+.nav-link:hover::after { transform: scaleX(1); transform-origin: bottom left; }
+.nav-link.active { color: var(--primary-color, #3f51b5); font-weight: 700; }
+.nav-link.active::after { transform: scaleX(1); transform-origin: bottom left; }
+
+.nav-hamburger {
+    display: none;
+    font-size: 1.8rem;
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 0;
+    color: var(--dark-text);
+}
+
+
+/*
+ * ===================================================================
+ *  모바일 & 태블릿 반응형 스타일
+ * ===================================================================
+ */
+@media (max-width: 992px) {
+    #app-wrapper {
+        padding: 60px 0.5rem 0.5rem 0.5rem;
+    }
+
+    .container {
+        padding: 1rem;
+    }
+    
+    #room-actions { 
+        flex-direction: column; 
+        gap: 1rem; 
+    }
+    
+    #main-game-area {
+        flex-direction: column;
+        gap: 1.5rem;
+    }
+
+    #side-panel-container {
+        min-width: unset;
+        width: 100%;
+        align-self: auto;
+    }
+    
+    .player-card {
+        display: flex;
+        gap: 0.8rem;
+        align-items: center;
+        padding: 0.8rem;
+    }
+    
+    .profile-section {
+        flex-shrink: 0;
+    }
+    .profile-image-preview {
+        width: 50px;
+        height: 50px;
+    }
+
+    /* [핵심] .content-section의 복잡한 grid를 단순한 flex-column으로 변경 */
+    .content-section {
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start; /* 왼쪽 정렬 */
+        flex-grow: 1;
+        gap: 0.5rem;
+        min-width: 0;
+    }
+
+    .player-info-text,
+    .player-status-display,
+    .player-action-area {
+        width: 100%; /* 모든 자식 요소가 너비를 100% 차지하도록 함 */
+    }
+
+    .player-name {
+        font-size: 1.1rem;
+    }
+    
+    .player-status-display {
+        font-size: 1.1rem; 
+        color: #6c757d;
+        text-align: left;
+    }
+
+
+    /* --- 기타 모바일 스타일 --- */
+    .result-header {
+        flex-direction: column;
+        align-items: stretch;
+        text-align: center;
+    }
+    
+    .game-nav {
+        height: 50px;
+    }
+
+    .nav-hamburger {
+        display: block;
+    }
+    
+    .nav-links {
+        position: absolute;
+        top: 50px; left: 0; right: 0;
+        background-color: rgba(255, 255, 255, 0.98);
+        box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+        flex-direction: column;
+        align-items: center;
+        gap: 0;
+        max-height: 0;
+        overflow: hidden;
+        transition: max-height 0.3s ease-in-out;
+    }
+
+    .nav-links.active {
+        max-height: 500px;
+        padding-bottom: 1rem;
+    }
+    
+    .nav-link {
+        width: 100%;
+        text-align: center;
+        padding: 1rem 0;
+        border-bottom: 1px solid #eee;
+    }
+
+    .nav-link::after {
+        display: none;
+    }
+}
+
+/*
+ * ===================================================================
+ *  공통 - 모바일 제목 글자 크기 수정
+ * ===================================================================
+ */
+@media (max-width: 768px) {
+    .top-bar-title {
+        font-size: 1.6rem;      /* 모바일 환경에 맞게 폰트 크기를 줄입니다. */
+        white-space: normal;    /* 제목이 길 경우 자연스럽게 줄바꿈을 허용합니다. */
+        line-height: 1.2;       /* 줄바꿈 시 줄 간격을 적절하게 조정합니다. */
+    }
+
+    .info-box, #copy-code-btn {
+        padding: 0.5rem 0.8rem; /* 제목 옆 버튼들의 여백도 살짝 줄여 공간을 확보합니다. */
+        font-size: 0.9rem;
+    }
+}
+

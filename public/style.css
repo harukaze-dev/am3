@@ -1,252 +1,137 @@
-/* --- 기본 & 폰트 설정 --- */
-:root {
-  --primary-color: #5a67d8;
-  --primary-hover: #4c58b6;
-  --light-gray: #f7fafc;
-  --border-color: #e2e8f0;
-  --text-dark: #2d3748;
-  --text-light: #718096;
-  --yeonri-color: #B695E0;
-  --morara-color: #F4979F;
-  --haeblin-color: #AAB1E5;
-  --kick-color: #d9534f;
-  --kick-hover: #c9302c;
-}
-body {
-  margin: 0; font-family: 'Noto Sans KR', sans-serif;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  color: var(--text-dark); display: flex; justify-content: flex-start;
-  align-items: center; min-height: 100vh; padding: 1rem;
-  box-sizing: border-box; overflow-x: hidden;
-}
-body.in-chat { align-items: flex-start; padding-top: 5vh; }
-.hidden { display: none !important; }
-
-/* --- 토스트 팝업 스타일 --- */
-#toast-popup {
-    position: fixed; top: 20px; right: 20px; background-color: var(--primary-color);
-    color: white; padding: 1rem 1.5rem; border-radius: 8px; box-shadow: 0 4px 10px rgba(0,0,0,0.2);
-    z-index: 2000; font-weight: 700; opacity: 1; transform: translateY(0);
-    transition: opacity 0.5s ease-in-out, transform 0.5s ease-in-out;
-}
-#toast-popup.hidden { opacity: 0; transform: translateY(-150px); }
-
-/* --- 메인 메뉴 & 프로필 설정 공통 스타일 --- */
-#main-menu, #profile-setup {
-    background: white; padding: 2rem 2.5rem; border-radius: 16px;
-    box-shadow: 0 10px 25px rgba(0,0,0,0.1), 0 5px 10px rgba(0,0,0,0.05);
-    width: 100%; max-width: 420px; text-align: center; transition: all 0.3s ease;
-    margin: 0 auto;
-}
-.lobby-header { margin-bottom: 2rem; }
-.lobby-header h1 { font-size: 2rem; font-weight: 700; margin: 0 0 0.5rem 0; color: var(--text-dark); }
-.lobby-header p { font-size: 1rem; color: var(--text-light); margin: 0; }
-.form-group { margin-bottom: 1.25rem; }
-.form-label { font-weight: 500; color: var(--text-dark); margin-bottom: 0.75rem; display: block; }
-.mode-selection { text-align: left; }
-.main-menu-btn, #join-form button, #confirm-profile-btn { width: 100%; padding: 0.8rem; background: var(--primary-color); color: white; border: none; border-radius: 8px; font-size: 1.1rem; font-weight: 700; cursor: pointer; transition: all 0.2s ease-in-out; }
-.main-menu-btn:hover, #join-form button:hover, #confirm-profile-btn:hover { background: var(--primary-hover); transform: translateY(-2px); box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
-.divider { margin: 1.5rem 0; color: var(--text-light); font-weight: 500; display: flex; align-items: center; text-align: center; }
-.divider::before, .divider::after { content: ''; flex: 1; border-bottom: 1px solid var(--border-color); }
-.divider:not(:empty)::before { margin-right: .5em; }
-.divider:not(:empty)::after { margin-left: .5em; }
-#join-form { display: flex; flex-direction: column; gap: 0.75rem; }
-#room-code-input { text-align: center; font-size: 1.2rem; text-transform: uppercase; width: 100%; padding: 0.8rem 1rem; border-radius: 8px; border: 1px solid var(--border-color); background-color: var(--light-gray); box-sizing: border-box; }
-#room-code-input[type="password"] { font-family: 'Verdana', sans-serif; letter-spacing: 2px; }
-#room-code-input::placeholder { letter-spacing: normal; text-transform: none; }
-#room-code-input:focus { outline: none; border-color: var(--primary-color); box-shadow: 0 0 0 3px rgba(90, 103, 216, 0.2); }
-.role-selection { display: flex; gap: 1rem; }
-.role-selection input[type="radio"] { display: none; }
-.role-label { flex: 1; padding: 0.75rem; border: 2px solid var(--border-color); border-radius: 8px; cursor: pointer; font-weight: 500; transition: all 0.2s ease-in-out; text-align: center; }
-.role-selection input[type="radio"]:checked + .role-label { background-color: #edf2f7; border-color: var(--primary-color); color: var(--primary-color); box-shadow: 0 0 0 3px rgba(90, 103, 216, 0.2); }
-select, #nickname-input { width: 100%; padding: 0.8rem 1rem; border-radius: 8px; border: 1px solid var(--border-color); background-color: var(--light-gray); box-sizing: border-box; font-size: 1rem; font-family: 'Noto Sans KR', sans-serif; appearance: none; background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e"); background-position: right 0.5rem center; background-repeat: no-repeat; background-size: 1.5em 1.5em; }
-select:focus, #nickname-input:focus { outline: none; border-color: var(--primary-color); box-shadow: 0 0 0 3px rgba(90, 103, 216, 0.2); }
-#fan-options { display: flex; gap: 1rem; }
-.profile-preview-container { margin: 1.5rem 0; }
-#profile-preview { width: 120px; height: 120px; border-radius: 50%; border: 4px solid white; box-shadow: 0 4px 15px rgba(0,0,0,0.15); object-fit: cover; transition: all 0.3s ease; }
-#profile-preview:hover { transform: scale(1.05); }
-
-/* --- 채팅방 스타일 --- */
-#chat-container { display: flex; flex-direction: column; gap: 1.5rem; width: 100%; }
-#chat-container.single-view-active { max-width: 800px; margin-left: 10%; }
-#chat-container.multi-view-active { max-width: 1600px; margin: 0 auto; }
-#multi-chat-view { display: flex; width: 100%; gap: 1.5rem; height: 85vh; }
-.chat-column {
-    flex: 1; display: flex; flex-direction: column; background-color: #40444b;
-    box-shadow: 0 4px 20px rgba(0,0,0,0.2); border-radius: 10px; overflow: hidden;
-}
-.chat-column-header {
-    padding: 0.5rem 1rem; background-color: #36393f; color: white;
-    display: flex; align-items: center; justify-content: space-between;
-    border-bottom: 1px solid #2f3136; font-weight: 700;
-}
-.column-title { display: flex; align-items: center; gap: 0.75rem; }
-.column-title img { width: 32px; height: 32px; border-radius: 50%; border: 2px solid white; }
-.chat-column-header.streamer-yeonri .column-copy-code-btn { background-color: var(--yeonri-color); }
-.chat-column-header.streamer-morara .column-copy-code-btn { background-color: var(--morara-color); }
-.chat-column-header.streamer-haeblin .column-copy-code-btn { background-color: var(--haeblin-color); }
-
-.chat-form {
-    background: #ffffff; padding: 0.75rem; display: flex;
-    box-sizing: border-box; border-top: 1px solid #e0e0e0;
-    gap: 0.75rem; align-items: center;
-}
-.chat-form input {
-    border: none; padding: 0.6rem 1rem; flex-grow: 1; border-radius: 2rem;
-    background-color: #f0f2f5; font-size: 0.95rem; color: #111111;
-}
-.chat-form input:focus { outline: none; box-shadow: 0 0 0 2px var(--primary-color); }
-.chat-form button {
-    border: none; border-radius: 50%; width: 38px; height: 38px; color: #fff;
-    cursor: pointer; font-weight: 700; transition: background-color 0.2s, opacity 0.2s;
-    background: var(--primary-color); flex-shrink: 0;
-}
-.chat-form button:hover { opacity: 0.85; }
-
-#single-chat-view { width: 100%; }
-#chat-wrapper {
-    width: 100%; height: 85vh; display: flex; flex-direction: column;
-    background-color: #40444b; box-shadow: 0 4px 20px rgba(0,0,0,0.2);
-    border-radius: 10px; overflow: hidden;
-}
-#chat-header {
-    padding: 0.75rem 1rem; background-color: #36393f; color: white;
-    display: grid; grid-template-columns: 1fr auto 1fr; align-items: center;
-    gap: 1rem; border-bottom: 1px solid #2f3136; flex-shrink: 0;
-}
-#chat-header h3 { margin: 0; text-align: center; grid-column: 2 / 3; }
-#chat-header > button:first-of-type { justify-self: start; }
-#chat-header > button:last-of-type { justify-self: end; }
-.header-btn {
-    background-color: #2f3136; color: #dcddde; border: 1px solid #4f545c;
-    border-radius: 5px; padding: 0.4rem 0.8rem; cursor: pointer;
-    font-size: 0.9rem; font-weight: 500; transition: all 0.2s;
-}
-.header-btn:hover { background-color: #4f545c; }
-#form {
-    background: #ffffff; padding: 0.75rem; display: flex;
-    box-sizing: border-box; border-top: 1px solid #e0e0e0;
-    gap: 0.75rem; align-items: center; flex-shrink: 0;
-}
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;700&display=swap');
 
 /* 
-  [수정됨] 이 부분이 팬덤 맞추기 모드의 스크롤 및 레이아웃 오류를 해결하는 핵심입니다.
-  flex-grow: 1 (남는 공간을 모두 차지)과 min-height: 0 (콘텐츠 크기보다 작아질 수 있음)을 함께 사용하여
-  메시지 목록이 할당된 공간을 초과하지 않고, 내용이 넘칠 때만 내부 스크롤이 생기도록 만듭니다.
-*/
-.messages {
-    list-style-type: none;
+ * ===================================================================
+ *  [핵심 해결책] 전역 box-sizing 설정
+ *  이 코드는 모든 요소의 너비(width)를 계산할 때, 
+ *  테두리(border)와 안쪽 여백(padding)을 너비에 포함시키라고 지시합니다.
+ * ===================================================================
+ */
+html {
+    box-sizing: border-box;
+}
+*, *:before, *:after {
+    box-sizing: inherit;
+}
+
+body {
+    font-family: 'Noto Sans KR', sans-serif;
+    background: linear-gradient(135deg, #f5f7fa, #c3cfe2);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
     margin: 0;
-    padding: 1.5rem;
-    overflow-y: auto;
-    flex-grow: 1;
-    min-height: 0;
+    /* 모바일 화면에서 좌우 여백이 없어 벽에 붙는 현상을 막기 위해 추가 */
+    padding: 1rem;
 }
-.message-item { display: flex; align-items: center; margin-bottom: 1.25rem; max-width: 90%; gap: 12px; }
-.streamer-message { margin-left: auto; flex-direction: row-reverse; }
-.sender-info { display: flex; flex-direction: column; align-items: center; flex-shrink: 0; }
-.chat-pfp { width: 50px; height: 50px; border-radius: 50%; object-fit: cover; background-color: white; border: 1px solid #cccccc; padding: 2px; box-sizing: border-box; }
-.chat-pfp.clickable { cursor: pointer; transition: transform 0.2s, box-shadow 0.2s; }
-.chat-pfp.clickable:hover { transform: scale(1.1); box-shadow: 0 0 10px var(--primary-color); }
-.chat-nickname { font-size: 0.85em; margin-top: 6px; padding: 3px 8px; border-radius: 5px; max-width: 80px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; transition: background-color 0.2s, color 0.2s; border: 1px solid #999; background-color: #cccccc; color: #111111; }
-.streamer-haeblin .chat-nickname, .fan-group-digdan .chat-nickname { background-color: var(--haeblin-color); color: white; border-color: var(--haeblin-color); }
-.streamer-yeonri .chat-nickname, .fan-group-yeonbab .chat-nickname { background-color: var(--yeonri-color); color: white; border-color: var(--yeonri-color); }
-.streamer-morara .chat-nickname, .fan-group-coral .chat-nickname { background-color: var(--morara-color); color: white; border-color: var(--morara-color); }
-.message-bubble { position: relative; border-radius: 14px; padding: 12px 18px; background: linear-gradient(to bottom, #e4e6eb, #f0f2f5); box-shadow: 0 0 0 4px white, 0 1px 2px rgba(0, 0, 0, 0.15); }
-.chat-message-text { margin: 0; font-size: 1em; line-height: 1.45; word-wrap: break-word; color: #333; }
-.streamer-message .chat-message-text { color: #ffffff; text-shadow: 0px 1px 2px rgba(0, 0, 0, 0.6); }
-.message-bubble::before { content: ""; position: absolute; top: 50%; transform: translateY(-50%); width: 0; height: 0; border-style: solid; }
-.message-item:not(.streamer-message) .message-bubble::before { left: -8px; border-width: 8px 10px 8px 0; border-color: transparent #e4e6eb transparent transparent; }
-.streamer-message .message-bubble::before { right: -8px; border-width: 8px 0 8px 10px; border-color: transparent transparent transparent #AAB1E5; }
-.streamer-haeblin .message-bubble { background: linear-gradient(to bottom, #AAB1E5, #c1c6f0); }
-.streamer-yeonri .message-bubble { background: linear-gradient(to bottom, #B695E0, #d1b8f0); }
-.streamer-morara .message-bubble { background: linear-gradient(to bottom, #F4979F, #f7b3b9); }
-.streamer-yeonri .message-bubble::before { border-left-color: #B695E0; }
-.streamer-morara .message-bubble::before { border-left-color: #F4979F; }
-.system-message { display: flex; align-items: center; justify-content: center; gap: 0.75em; margin: 0.5rem auto; }
-.system-pfp { width: 24px; height: 24px; border-radius: 50%; background-color: white; border: 1px solid #999; padding: 1px; box-sizing: border-box; }
-.system-nickname { color: white; font-weight: 700; font-style: normal; }
-.system-text { color: #96989d; font-style: italic; font-size: 0.95em; }
-.game-message { text-align: center; padding: 0.8rem 1.5rem; margin: 1rem auto; border-radius: 10px; font-size: 1.1em; font-weight: 700; color: white; text-shadow: 1px 1px 3px rgba(0,0,0,0.5); border: 2px solid rgba(255,255,255,0.5); }
-.game-message-success { background: linear-gradient(45deg, #f7971e, #ffd200); }
-.game-message-reveal { background: linear-gradient(45deg, #6a11cb, #2575fc); }
-.game-message-fail { background: linear-gradient(45deg, #6c757d, #343a40); }
-.game-message strong { font-weight: 900; color: #ffeb3b; }
-.game-message span { font-style: italic; color: #c7d2fe; }
-.game-message-pfp { display: block; width: 120px; height: 120px; border-radius: 50%; margin: 1rem auto 0; border: 4px solid rgba(255, 255, 255, 0.7); box-shadow: 0 4px 15px rgba(0,0,0,0.3); object-fit: cover; }
-#input { border: none; padding: 0.75rem 1.25rem; flex-grow: 1; border-radius: 2rem; background-color: #f0f2f5; font-size: 1rem; color: #111111; }
-#input:focus { outline: none; box-shadow: 0 0 0 2px var(--primary-color); }
-#form button { border: none; border-radius: 2rem; color: #fff; cursor: pointer; font-weight: 700; transition: background-color 0.2s, opacity 0.2s; padding: 0.6rem 1.2rem; white-space: nowrap; }
-#form button:hover { opacity: 0.85; }
-#form button[type="submit"] { background: var(--primary-color); }
-#action-btn { background: #6c757d; }
-#action-btn:disabled { background: #a0a0a0; cursor: not-allowed; }
-#action-btn.streamer-yeonri, #action-btn.fan-group-yeonbab { background-color: var(--yeonri-color); }
-#action-btn.streamer-morara, #action-btn.fan-group-coral { background-color: var(--morara-color); }
-#action-btn.streamer-haeblin, #action-btn.fan-group-digdan { background-color: var(--haeblin-color); }
-.modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.6); display: flex; justify-content: center; align-items: center; z-index: 1000; }
-.modal-content { background-color: #36393f; color: #dcddde; padding: 2rem; border-radius: 10px; width: 90%; max-width: 500px; text-align: center; }
-.modal-content h2 { margin-top: 0; }
-.modal-content > p { margin-top: 0.5rem; margin-bottom: 1.5rem; color: #b9bbbe; }
-.modal-buttons { display: flex; justify-content: center; gap: 1rem; margin-top: 1.5rem; }
-.modal-buttons button, #guess-modal-close, #manage-players-modal-close, #guess-group-modal-close { padding: 0.6rem 1.5rem; border: none; border-radius: 5px; cursor: pointer; font-weight: 700; transition: opacity 0.2s; }
-.modal-buttons button:hover, #guess-modal-close:hover, #manage-players-modal-close:hover, #guess-group-modal-close:hover { opacity: 0.8; }
-#guess-modal-close, #manage-players-modal-close, #guess-group-modal-close { background-color: var(--primary-color); color: white; }
-#guess-group-target-info { display: flex; flex-direction: column; align-items: center; gap: 0.75rem; margin-bottom: 1.5rem; padding-bottom: 1.5rem; border-bottom: 1px solid #4f545c; }
-#guess-group-target-info .player-pfp { width: 80px; height: 80px; border-radius: 50%; object-fit: cover; }
-#guess-group-target-info .player-name { font-size: 1.2rem; }
-.guess-group-btn, .guess-role-btn { display: flex; align-items: center; gap: 0.75rem; padding: 1rem; flex-grow: 1; background-color: #40444b; border: 2px solid #4f545c; border-radius: 8px; cursor: pointer; font-weight: 700; font-size: 1rem; color: white; transition: transform 0.2s, box-shadow 0.2s, border-color 0.2s; }
-.guess-group-btn, .guess-role-btn.with-pfp { flex-direction: column; }
-.guess-group-btn:hover, .guess-role-btn:hover { transform: translateY(-3px); box-shadow: 0 4px 10px rgba(0,0,0,0.2); }
-.guess-role-btn:hover { border-color: var(--primary-color); }
-.guess-group-btn[data-group="yeonbab"]:hover { border-color: var(--yeonri-color); }
-.guess-group-btn[data-group="coral"]:hover { border-color: var(--morara-color); }
-.guess-group-btn[data-group="digdan"]:hover { border-color: var(--haeblin-color); }
-.guess-group-btn img, .guess-role-btn img { width: 60px; height: 60px; border-radius: 50%; object-fit: cover; }
-#fan-card-container { display: grid; grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); gap: 1rem; margin-top: 1.5rem; max-height: 40vh; overflow-y: auto; padding: 0.5rem; background-color: #2f3136; border-radius: 5px; }
-.fan-card { background-color: #40444b; padding: 1rem; border-radius: 8px; cursor: pointer; transition: transform 0.2s, box-shadow 0.2s; }
-.fan-card:hover { transform: translateY(-5px); box-shadow: 0 5px 15px rgba(0,0,0,0.3); }
-.fan-card img { width: 60px; height: 60px; border-radius: 50%; object-fit: cover; margin-bottom: 0.5rem; }
-.fan-card p { margin: 0; font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-#player-list-container { display: flex; flex-direction: column; gap: 0.75rem; margin-top: 1.5rem; max-height: 50vh; overflow-y: auto; padding: 0.5rem; background-color: #2f3136; border-radius: 5px; }
-.player-list-item { display: flex; align-items: center; background-color: #40444b; padding: 0.75rem; border-radius: 5px; transition: background-color 0.2s; }
-.player-pfp { width: 40px; height: 40px; border-radius: 50%; object-fit: cover; margin-right: 1rem; }
-.player-name { flex-grow: 1; font-weight: 500; text-align: left; }
-.kick-btn { background-color: var(--kick-color); color: white; border: none; border-radius: 5px; padding: 0.4rem 0.8rem; cursor: pointer; font-weight: 700; transition: background-color 0.2s; }
-.kick-btn:hover { background-color: var(--kick-hover); }
-#common-controls { display: flex; justify-content: center; }
-#leave-room-btn {
-    padding: 0.75rem 2rem; background-color: rgba(255, 255, 255, 0.2); color: white;
-    border: 1px solid rgba(255, 255, 255, 0.5); border-radius: 50px; cursor: pointer;
-    font-weight: 700; font-size: 1rem; transition: all 0.2s ease;
-}
-#leave-room-btn:hover { background-color: rgba(255, 255, 255, 0.3); transform: translateY(-2px); }
 
-.private-guess-content {
-    position: relative; background-color: #36393f; color: #dcddde;
-    padding: 2rem; border-radius: 10px; width: 90%; max-width: 1000px;
-    display: flex; gap: 1.5rem; height: 80vh;
+.main-container {
+    text-align: center;
+    background: white;
+    padding: 3rem 4rem;
+    border-radius: 16px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+    width: 100%;
+    max-width: 900px;
 }
-.private-guess-left { width: 300px; flex-shrink: 0; display: flex; flex-direction: column; gap: 1.5rem; }
-.private-guess-right { flex-grow: 1; display: flex; flex-direction: column; background-color: #2f3136; border-radius: 8px; overflow: hidden; }
-.private-guess-left h3, .private-guess-right h3 { margin: 0; padding-bottom: 1rem; border-bottom: 1px solid #4f545c; text-align: center;}
-#private-guess-target-info { display: flex; flex-direction: column; align-items: center; gap: 1rem; }
-#private-guess-target-info .player-pfp { width: 100px; height: 100px; border-radius: 50%; }
-#private-guess-target-info .player-name { font-size: 1.3rem; font-weight: 700; }
-#private-guess-options-container { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
-#private-guess-admin-controls { margin-top: auto; padding-top: 1.5rem; border-top: 1px solid #4f545c; }
-#private-kick-btn { width: 100%; }
-#private-chat-log { padding: 1rem; }
-.modal-close-btn {
-    position: absolute; top: 1rem; right: 1rem;
-    background: none; border: none; color: #b9bbbe;
-    font-size: 2rem; line-height: 1; cursor: pointer; transition: color 0.2s;
-}
-.modal-close-btn:hover { color: white; }
 
-.messages::-webkit-scrollbar, #fan-card-container::-webkit-scrollbar, #player-list-container::-webkit-scrollbar { width: 8px; }
-.messages::-webkit-scrollbar-track, #fan-card-container::-webkit-scrollbar-track, #player-list-container::-webkit-scrollbar-track { background: #2f3136; border-radius: 10px; }
-.messages::-webkit-scrollbar-thumb, #fan-card-container::-webkit-scrollbar-thumb, #player-list-container::-webkit-scrollbar-thumb {
-    background-color: #6c757d; border-radius: 10px; border: 2px solid #2f3136;
+h1 {
+    color: #333;
+    margin-bottom: 0.5rem;
 }
-.messages::-webkit-scrollbar-thumb:hover, #fan-card-container::-webkit-scrollbar-thumb:hover, #player-list-container::-webkit-scrollbar-thumb:hover { background-color: var(--primary-color); }
+
+.main-container > p {
+    color: #666;
+    font-size: 1.1rem;
+    margin-bottom: 2.5rem;
+}
+
+/* --- [수정된 부분] Flexbox에서 Grid로 레이아웃 변경 --- */
+.game-selection {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr); /* 3개의 열을 가진 그리드 생성 */
+    gap: 2rem;
+    justify-content: center;
+}
+
+.game-card {
+    background: #f9f9f9;
+    border: 1px solid #eee;
+    border-radius: 12px;
+    padding: 2rem;
+    /* width와 flex-shrink 속성 제거, grid가 너비를 제어하도록 함 */
+    text-decoration: none;
+    color: inherit;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    display: flex; /* 내부 콘텐츠 정렬을 위해 flex 사용 */
+    flex-direction: column;
+    justify-content: center;
+}
+
+.game-card:hover {
+    transform: translateY(-10px);
+    box-shadow: 0 15px 30px rgba(0, 0, 0, 0.15);
+}
+
+.game-card h2 {
+    margin-top: 0;
+    color: #3f51b5;
+}
+
+.game-card p {
+    font-size: 0.9rem;
+    line-height: 1.5;
+    color: #555;
+    margin-bottom: 0;
+    flex-grow: 1; /* 설명 텍스트가 공간을 채우도록 함 */
+}
+
+/* --- [추가된 부분] '개발중' 카드 스타일 --- */
+.game-card.disabled {
+    background: #f1f1f1;
+    border-color: #e0e0e0;
+    cursor: not-allowed;
+    align-items: center; /* 수직 중앙 정렬 */
+}
+
+.game-card.disabled h2 {
+    color: #aaa;
+    margin: 0;
+}
+
+.game-card.disabled:hover {
+    transform: none;
+    box-shadow: none;
+}
+
+
+/* 
+ * ===================================================================
+ *  모바일 반응형 스타일
+ * ===================================================================
+ */
+@media (max-width: 850px) {
+    .main-container {
+        padding: 2rem 1.5rem;
+    }
+
+    .game-selection {
+        /* [수정] 모바일에서는 1열로 표시되도록 변경 */
+        grid-template-columns: 1fr;
+        gap: 1.5rem;
+    }
+
+    .game-card {
+        width: 100%;
+        max-width: 400px; 
+    }
+
+    h1 {
+        font-size: 1.8rem;
+    }
+
+    .main-container > p {
+        font-size: 1rem;
+    }
+}

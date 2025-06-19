@@ -1,0 +1,120 @@
+/*
+ * ===================================================================
+ *  문장퍼즐게임 (Text Game) 전용 스타일시트
+ * ===================================================================
+ */
+
+/* --- 1. 기본 레이아웃 및 공통 스타일 --- */
+#app-wrapper:has(#lobby-container:not(.hidden)) { margin: 0 auto; }
+#app-wrapper { max-width: 1600px; margin: 0 auto 0 2px; }
+#host-controls button { padding: 0.5rem 1rem; font-size: 1rem; font-family: 'Poppins', 'Noto Sans KR', sans-serif; border-radius: 8px; border: none; cursor: pointer; transition: all 0.3s ease; font-weight: bold; white-space: nowrap; background-color: var(--mint-color); color: white; }
+#host-controls button:hover { transform: translateY(-2px); box-shadow: 0 4px 8px rgba(0,0,0,0.15); }
+#main-game-area { display: grid; grid-template-columns: 2.5fr 3.5fr; gap: 2rem; align-items: center; height: 75vh; }
+#player-list-board { background: white; border-radius: 16px; padding: 1.5rem; box-shadow: 0 4px 15px rgba(0,0,0,0.05); display: flex; flex-direction: column; gap: 0.8rem; overflow-y: auto; height: 100%; }
+#player-list-board .player-card { display: grid; grid-template-columns: 50px 1fr; align-items: center; gap: 1rem; padding: 0.8rem; border-left-width: 5px; transition: all 0.3s ease; cursor: default; min-height: 70px; }
+#player-list-board .profile-image-preview { width: 50px; height: 50px; border-radius: 50%; object-fit: cover; }
+.content-section { display: grid; grid-template-columns: auto 1fr auto; align-items: center; min-width: 0; gap: 1rem; width: 100%; }
+.player-info-text { grid-column: 1 / 2; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.player-name { font-size: 1.1rem; font-weight: bold; }
+.player-action-area { grid-column: 2 / 3; min-width: 0; display: flex; justify-content: center; }
+.player-score { grid-column: 3 / 4; margin-left: auto; font-size: 1.1rem; font-weight: bold; }
+
+/* [추가] 상단 바 중앙 영역 스타일 */
+.top-bar-center {
+    flex-grow: 1;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-width: 0; /* flex 자식 요소의 수축 문제를 방지 */
+}
+
+/* --- 2. 게임 상태별 카드 스타일 --- */
+.player-card.current-turn { background-color: #e8f5e9; }
+/* [삭제] turn-input-container 스타일 삭제. 상단 바로 이동. */
+.player-status-display { font-weight: bold; color: #555; }
+.buzz-in-btn { width: 100%; padding: 0.8rem; font-size: 1.2rem; font-weight: bold; border: none; border-radius: 8px; cursor: pointer; transition: all 0.2s ease; }
+.buzz-in-btn:hover { transform: scale(1.05); box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
+.player-card.guesser { border-color: var(--accent-color); animation: pulse-guesser 1s infinite; }
+@keyframes pulse-guesser { 0% { box-shadow: 0 0 0 0 rgba(255, 235, 59, 0.7); } 70% { box-shadow: 0 0 0 10px rgba(255, 235, 59, 0); } 100% { box-shadow: 0 0 0 0 rgba(255, 235, 59, 0); } }
+.player-status-display.guesser-text { color: #f57f17; }
+.player-card.incorrect { background-color: #fce4ec; opacity: 0.6; }
+.judge-actions { display: flex; gap: 0.8rem; width: 100%; justify-content: center; }
+.judge-btn { padding: 0.6rem 1.2rem; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; color: white; transition: transform 0.2s; }
+.judge-btn:hover { transform: scale(1.05); }
+.judge-btn.correct { background-color: #29b6f6; }
+.judge-btn.incorrect { background-color: #ef5350; }
+
+/* --- 3. 문장퍼즐게임 보드 & 글자 스타일 --- */
+#text-game-board { background-color: #3d3d3d; border: 1px solid #555; padding: 1rem; border-radius: 12px; box-shadow: inset 0 0 20px rgba(0, 0, 0, 0.5), 0 6px 24px rgba(0, 0, 0, 0.08); width: 100%; max-width: 600px; max-height: 600px; aspect-ratio: 1 / 1; margin: 0 auto; }
+#text-grid-container { display: grid; grid-template-columns: repeat(4, 1fr); grid-template-rows: repeat(4, 1fr); gap: 0.5rem; width: 100%; height: 100%; }
+.text-box { border-radius: 6px; display: flex; justify-content: center; align-items: center; font-size: 6.5vw; line-height: 1; font-weight: 700; font-family: 'Noto Sans KR', sans-serif; transition: background-color 0.3s ease; overflow: hidden; color: #FFFFFF; text-shadow: -2px -2px 0 #000, 2px -2px 0 #000, -2px 2px 0 #000, 2px 2px 0 #000, -2px 0 0 #000, 2px 0 0 #000, 0 -2px 0 #000, 0 2px 0 #000; }
+
+/*
+ * ===================================================================
+ *  [신규] 4. 상단 바 입력 폼 스타일
+ * ===================================================================
+ */
+#top-bar-input-container {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    width: 100%;
+    max-width: 600px; /* 입력 폼 최대 너비 */
+}
+
+#top-bar-input-container label {
+    font-size: 1.8rem; /* 타이틀보다 약간 작은 폰트 크기 */
+    font-weight: bold;
+    color: var(--primary-color);
+    white-space: nowrap; /* "문제 출제 :" 글자가 줄바꿈되지 않도록 함 */
+}
+
+.top-bar-input {
+    flex-grow: 1; /* 남는 공간을 모두 차지 */
+    padding: 0.7rem 1rem;
+    font-size: 1.2rem;
+    border: 2px solid #ccc;
+    border-radius: 8px;
+    outline: none;
+    transition: border-color 0.2s;
+}
+
+.top-bar-input:focus {
+    border-color: var(--primary-color);
+}
+
+.top-bar-submit-btn {
+    padding: 0.7rem 1.5rem;
+    font-size: 1.2rem;
+    font-weight: bold;
+    border: none;
+    border-radius: 8px;
+    background-color: var(--mint-color);
+    color: white;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.top-bar-submit-btn:hover {
+    background-color: #3aa79c;
+}
+
+/* 정답 팝업 스타일 */
+#game-popup { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%) scale(0.8); color: white; padding: 1.5rem 3rem; border-radius: 1rem; font-size: 2rem; font-weight: bold; z-index: 1005; opacity: 0; visibility: hidden; transition: all 0.3s ease; box-shadow: 0 10px 30px rgba(0,0,0,0.3); }
+#game-popup.show { transform: translate(-50%, -50%) scale(1); opacity: 1; visibility: visible; }
+
+/* --- 5. 모바일 반응형 --- */
+@media (max-width: 992px) { 
+    #app-wrapper { margin: 0 auto; } 
+    #main-game-area { grid-template-columns: 1fr; height: auto; align-items: stretch; } 
+    #player-list-board { height: auto; max-height: 40vh; } 
+    #text-game-board { min-height: 300px; } 
+    .text-box { font-size: 11vw; } 
+    .content-section { gap: 0.5rem; grid-template-columns: auto 1fr auto; } 
+    .player-name {font-size: 1rem;} 
+
+    /* 모바일에서는 상단 바 입력 폼이 너무 커지지 않도록 조정 */
+    #top-bar-input-container { flex-wrap: wrap; justify-content: center; }
+    #top-bar-input-container label { width: 100%; text-align: center; font-size: 1.2rem; margin-bottom: 0.5rem; }
+    .top-bar-input { font-size: 1rem; }
+}

@@ -1,0 +1,55 @@
+#app-wrapper:has(#lobby-container:not(.hidden)) { margin: 0 auto; }
+#app-wrapper { max-width: 1600px; margin: 0 auto 0 2px; }
+#host-controls button { padding: 0.5rem 1rem; font-size: 1rem; font-family: 'Poppins', 'Noto Sans KR', sans-serif; border-radius: 8px; border: none; cursor: pointer; transition: all 0.3s ease; font-weight: bold; white-space: nowrap; background-color: var(--mint-color); color: white; }
+#host-controls button:hover { transform: translateY(-2px); box-shadow: 0 4px 8px rgba(0,0,0,0.15); }
+#main-game-area { display: grid; grid-template-columns: 2.5fr 3.5fr; gap: 2rem; align-items: center; height: 75vh; }
+#player-list-board { background: white; border-radius: 16px; padding: 1.5rem; box-shadow: 0 4px 15px rgba(0,0,0,0.05); display: flex; flex-direction: column; gap: 0.8rem; overflow-y: auto; height: 100%; }
+#player-list-board .player-card { display: grid; grid-template-columns: 50px 1fr; align-items: center; gap: 1rem; padding: 0.8rem; border-left-width: 5px; transition: all 0.3s ease; cursor: default; min-height: 70px; }
+#player-list-board .profile-image-preview { width: 50px; height: 50px; border-radius: 50%; object-fit: cover; }
+
+.content-section { display: grid; grid-template-columns: auto 1fr auto; align-items: center; min-width: 0; gap: 1rem; width: 100%; }
+.player-info-text { grid-column: 1 / 2; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.player-name { font-size: 1.1rem; font-weight: bold; }
+.player-action-area { grid-column: 2 / 3; min-width: 0; display: flex; justify-content: center; }
+.player-score { grid-column: 3 / 4; margin-left: auto; font-size: 1.1rem; font-weight: bold; }
+
+/* --- 게임 상태별 카드 스타일 --- */
+.player-card.current-turn { background-color: #e8f5e9; }
+.turn-input-container { display: flex; gap: 0.5rem; width: 100%; align-items: center; }
+.turn-input { flex-grow: 1; padding: 0.5rem; font-size: 1rem; border: 2px solid #81c784; border-radius: 6px; outline: none; min-width: 0; }
+.turn-submit-btn { padding: 0.5rem 1rem; border: none; background-color: #66bb6a; color: white; font-weight: bold; border-radius: 6px; cursor: pointer; transition: background-color 0.2s; flex-shrink: 0; }
+.player-status-display { font-weight: bold; color: #555; }
+.buzz-in-btn { width: 100%; padding: 0.8rem; font-size: 1.2rem; font-weight: bold; border: none; border-radius: 8px; cursor: pointer; transition: all 0.2s ease; }
+.buzz-in-btn:hover { transform: scale(1.05); box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
+.player-card.guesser { border-color: var(--accent-color); animation: pulse-guesser 1s infinite; }
+@keyframes pulse-guesser { 0% { box-shadow: 0 0 0 0 rgba(255, 235, 59, 0.7); } 70% { box-shadow: 0 0 0 10px rgba(255, 235, 59, 0); } 100% { box-shadow: 0 0 0 0 rgba(255, 235, 59, 0); } }
+.player-status-display.guesser-text { color: #f57f17; }
+.player-card.incorrect { background-color: #fce4ec; opacity: 0.6; }
+.judge-actions { display: flex; gap: 0.8rem; width: 100%; justify-content: center; }
+.judge-btn { padding: 0.6rem 1.2rem; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; color: white; transition: transform 0.2s; }
+.judge-btn:hover { transform: scale(1.05); }
+.judge-btn.correct { background-color: #29b6f6; }
+.judge-btn.incorrect { background-color: #ef5350; }
+
+/* --- 게임 보드 & 글자 스타일 --- */
+#led-game-board { background-color: #2c2c2c; border: 1px solid #444; padding: 1rem; border-radius: 12px; box-shadow: inset 0 0 20px rgba(0, 0, 0, 0.5), 0 6px 24px rgba(0, 0, 0, 0.08); width: 100%; max-width: 600px; max-height: 600px; aspect-ratio: 1 / 1; margin: 0 auto; }
+.led-grid-container { display: grid; grid-template-columns: repeat(2, 1fr); grid-template-rows: repeat(2, 1fr); gap: 1rem; width: 100%; height: 100%; }
+.led-box { background-color: #1a1a1a; border-radius: 8px; overflow: hidden; position: relative; transition: opacity 0.05s ease-in-out; }
+/* 
+ * ===================================================================
+ *  [핵심 해결책 3] 격자 선 두께 두 배로 변경 (6px -> 12px)
+ * ===================================================================
+ */
+.led-box::after { content: ''; position: absolute; top: 0; left: 0; right: 0; bottom: 0; background-image: repeating-linear-gradient(to right, rgba(0,0,0,0.4) 0, rgba(0,0,0,0.4) 12px, transparent 12px, transparent 100%), repeating-linear-gradient(to bottom, rgba(0,0,0,0.4) 0, rgba(0,0,0,0.4) 12px, transparent 12px, transparent 100%); background-size: calc(100% / 16) calc(100% / 16); pointer-events: none; z-index: 2; }
+.led-char { font-size: 600px; font-family: 'Noto Sans KR', 'Poppins', sans-serif; font-weight: 900; line-height: 1; position: absolute; display: flex; justify-content: center; align-items: center; z-index: 1; }
+#led-box-1 .led-char { top: 0; left: 0; }
+#led-box-2 .led-char { top: 0; right: 0; }
+#led-box-3 .led-char { bottom: 0; left: 0; }
+#led-box-4 .led-char { bottom: 0; right: 0; }
+
+/* 정답 팝업 스타일 */
+#game-popup { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%) scale(0.8); color: white; padding: 1.5rem 3rem; border-radius: 1rem; font-size: 2rem; font-weight: bold; z-index: 1005; opacity: 0; visibility: hidden; transition: all 0.3s ease; box-shadow: 0 10px 30px rgba(0,0,0,0.3); }
+#game-popup.show { transform: translate(-50%, -50%) scale(1); opacity: 1; visibility: visible; }
+
+/* --- 모바일 반응형 --- */
+@media (max-width: 992px) { #app-wrapper { margin: 0 auto; } #main-game-area { grid-template-columns: 1fr; height: auto; align-items: stretch; } #player-list-board { height: auto; max-height: 40vh; } #led-game-board { min-height: 300px; } .led-char { font-size: 80vw; } .content-section { gap: 0.5rem; grid-template-columns: auto 1fr auto; } .player-name {font-size: 1rem;} }

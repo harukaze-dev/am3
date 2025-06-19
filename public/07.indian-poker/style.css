@@ -1,0 +1,105 @@
+/*
+ * ===================================================================
+ *  양세찬게임 (Indian Poker) 전용 스타일시트
+ * ===================================================================
+ */
+
+/* --- 1. 기본 레이아웃 및 공통 스타일 --- */
+#app-wrapper:has(#lobby-container:not(.hidden)) { margin: 0 auto; }
+#app-wrapper { max-width: 1400px; }
+#host-controls button { padding: 0.5rem 1rem; font-size: 1rem; border-radius: 8px; border: none; cursor: pointer; transition: all 0.3s ease; font-weight: bold; white-space: nowrap; background-color: var(--mint-color); color: white; }
+#main-game-area { display: block; margin-top: 1.5rem; }
+#player-list-board { display: grid; grid-template-columns: repeat(2, 1fr); gap: 1.5rem; }
+
+/* --- 2. 플레이어 카드 스타일 --- */
+.player-card {
+    background-color: #ffffff;
+    border-radius: 16px;
+    padding: 1.5rem;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+    transition: all 0.3s ease-out;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1rem;
+    text-align: center;
+    border-left: 8px solid transparent;
+}
+
+.player-info { display: flex; align-items: center; gap: 1rem; }
+.profile-image-preview { width: 60px; height: 60px; border-radius: 50%; object-fit: cover; border: 3px solid white; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+.player-name { font-size: 1.5rem; font-weight: bold; }
+
+/* --- 3. 게임 상태별 카드 내부 UI 스타일 --- */
+
+/* 3-1. 주제어 표시 영역 */
+.topic-display-area { background: #f1f3f5; padding: 1rem 1.5rem; border-radius: 12px; font-size: 1.8rem; font-weight: bold; min-height: 80px; width: 100%; display: flex; justify-content: center; align-items: center; color: #495057; }
+.topic-display-area.hidden-topic { background: repeating-linear-gradient(45deg, #e9ecef, #e9ecef 10px, #ced4da 10px, #ced4da 20px); color: transparent; }
+
+/* 3-2. 주제어 입력/수정 영역 */
+.topic-interaction-area { width: 100%; display: flex; flex-direction: column; gap: 0.75rem; }
+.topic-input { width: 100%; padding: 0.75rem; font-size: 1.1rem; border: 2px solid #ccc; border-radius: 8px; text-align: center; }
+.interaction-buttons { display: flex; gap: 0.75rem; }
+.interaction-buttons button { flex: 1; padding: 0.6rem; font-size: 1rem; font-weight: bold; border-radius: 8px; border: none; cursor: pointer; }
+
+.submit-topic-btn { background-color: #4CAF50; color: white; }
+.cancel-edit-btn { background-color: #f44336; color: white; }
+
+/*
+ * ===================================================================
+ *  [핵심 수정] 수정 버튼 스타일 개선
+ * ===================================================================
+ */
+.edit-topic-btn {
+    background-color: #e9ecef; /* 차분한 연회색 배경 */
+    color: #495057;           /* 가독성 좋은 어두운 텍스트 색상 */
+    padding: 0.4rem 0.8rem;    /* 다른 버튼보다 작은 여백 */
+    font-size: 0.9rem;         /* 작은 폰트 크기 */
+    font-weight: bold;
+    flex-shrink: 0;            /* 크기가 줄어들지 않도록 설정 */
+    border: 1px solid #dee2e6; /* 미세한 테두리로 입체감 부여 */
+    transition: background-color 0.2s ease; /* 부드러운 호버 효과 */
+}
+
+.edit-topic-btn:hover {
+    background-color: #dee2e6; /* 호버 시 약간 더 어두운 색으로 변경 */
+}
+
+
+.submitted-topic-display {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    background: #f8f9fa;
+    padding: 0.5rem 1rem;
+    border-radius: 8px;
+    border: 1px solid #f1f3f5;
+}
+.submitted-topic-display p {
+    flex-grow: 1;
+    margin: 0;
+    font-size: 1.2rem;
+    font-weight: bold;
+    color: #343a40;
+    text-align: left;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* 3-3. 상태 텍스트 */
+.status-text { font-size: 1.2rem; color: #868e96; font-weight: bold; }
+
+/* --- 4. 게임 진행 중 상호작용 스타일 --- */
+.player-card.host-clickable { cursor: pointer; box-shadow: 0 0 0 3px var(--accent-color); }
+.player-card.host-clickable:hover { transform: translateY(-5px); box-shadow: 0 8px 20px rgba(0,0,0,0.12), 0 0 0 3px var(--accent-color); }
+.player-card.cleared { transform: scale(1.02); }
+.player-card.cleared .topic-display-area { color: white; text-shadow: 1px 1px 3px rgba(0,0,0,0.5); }
+
+/* --- 5. 모바일 반응형 --- */
+@media (max-width: 850px) {
+    #player-list-board { grid-template-columns: 1fr; }
+    .player-name { font-size: 1.2rem; }
+    .topic-display-area { font-size: 1.3rem; min-height: 60px; }
+}

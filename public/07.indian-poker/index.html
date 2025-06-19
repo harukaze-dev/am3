@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>양세찬게임</title>
+    <link rel="stylesheet" href="/css/common.css">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body class="in-lobby">
+    <div id="toast-container"></div>
+    <div id="app-wrapper">
+
+        <!-- 로비 화면 -->
+        <div id="lobby-container" class="lobby-container">
+            <h1>양세찬게임</h1>
+            <div class="lobby-step">
+                <h2>닉네임 & 프로필 설정</h2>
+                <div class="lobby-profile-container">
+                    <img id="lobby-profile-preview" src="/assets/default-profile.png" alt="Profile Preview">
+                    <input type="file" id="lobby-profile-input" class="hidden" accept="image/*">
+                    <p>이미지를 클릭하여 변경</p>
+                </div>
+                <input type="text" id="player-name-input" placeholder="사용할 닉네임을 입력하세요 (8자 이내)" maxlength="8">
+            </div>
+            <div id="room-actions" class="hidden">
+                <div class="action-box">
+                    <h3>새로운 게임 시작</h3>
+                    <button id="create-room-btn">방 만들기</button>
+                </div>
+                <div class="action-box">
+                    <h3>초대 코드로 참가</h3>
+                    <input type="password" id="room-code-input" placeholder="초대 코드 입력">
+                    <button id="join-room-btn">참가하기</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 게임 진행 화면 -->
+        <div id="game-container" class="container hidden">
+            <!-- 상단 정보 바 -->
+            <div id="top-bar">
+                <div class="top-bar-left">
+                    <div id="player-count-display" class="info-box"></div>
+                    <button id="copy-code-btn">방 초대코드 복사</button>
+                </div>
+                <h1 class="top-bar-title">양세찬게임</h1>
+                <div class="top-bar-right">
+                    <div id="host-controls">
+                        <!-- 버튼 내용은 client.js에서 동적으로 변경됩니다 -->
+                    </div>
+                </div>
+            </div>
+            
+            <!-- [수정] 메인 게임 영역: 게임 보드 없이 플레이어 목록만 존재 -->
+            <div id="main-game-area">
+                <div id="player-list-board">
+                    <!-- 플레이어 카드는 client.js에서 동적으로 생성됩니다. -->
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script src="/js/nav.js"></script> 
+    <script src="/socket.io/socket.io.js"></script>
+    <script src="client.js"></script>
+</body>
+</html>

@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>문장퍼즐게임</title>
+    <link rel="stylesheet" href="/css/common.css">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body class="in-lobby">
+    <div id="toast-container"></div>
+    <div id="app-wrapper">
+
+        <!-- 로비 화면 -->
+        <div id="lobby-container" class="lobby-container">
+            <h1>문장퍼즐게임</h1>
+            <div class="lobby-step">
+                <h2>닉네임 & 프로필 설정</h2>
+                <div class="lobby-profile-container">
+                    <img id="lobby-profile-preview" src="/assets/default-profile.png" alt="Profile Preview">
+                    <input type="file" id="lobby-profile-input" class="hidden" accept="image/*">
+                    <p>이미지를 클릭하여 변경</p>
+                </div>
+                <input type="text" id="player-name-input" placeholder="사용할 닉네임을 입력하세요 (8자 이내)" maxlength="8">
+            </div>
+            <div id="room-actions" class="hidden">
+                <div class="action-box">
+                    <h3>새로운 게임 시작</h3>
+                    <button id="create-room-btn">방 만들기</button>
+                </div>
+                <div class="action-box">
+                    <h3>초대 코드로 참가</h3>
+                    <input type="password" id="room-code-input" placeholder="초대 코드 입력">
+                    <button id="join-room-btn">참가하기</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 게임 진행 화면 -->
+        <div id="game-container" class="container hidden">
+            <!-- 상단 정보 바 -->
+            <div id="top-bar">
+                <div class="top-bar-left">
+                    <div id="player-count-display" class="info-box"></div>
+                    <button id="copy-code-btn">방 초대코드 복사</button>
+                </div>
+
+                <!-- [수정] 중앙 컨텐츠 영역 (타이틀과 입력폼을 담을 컨테이너) -->
+                <div class="top-bar-center">
+                    <h1 id="game-title-text" class="top-bar-title">문장퍼즐게임</h1>
+                    <div id="top-bar-input-container" class="hidden">
+                        <!-- 입력 폼은 client.js에서 동적으로 생성됩니다. -->
+                    </div>
+                </div>
+
+                <div class="top-bar-right">
+                    <div id="host-controls">
+                        <button id="start-game-button" class="hidden">게임 시작</button>
+                        <button id="reset-round-button" class="hidden">완전 초기화</button>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 메인 게임 영역 -->
+            <div id="main-game-area">
+                <div id="player-list-board"></div>
+                <div id="text-game-board">
+                    <div id="text-grid-container"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div id="game-popup"></div>
+
+    <script src="/js/nav.js"></script> 
+    <script src="/socket.io/socket.io.js"></script>
+    <script src="client.js"></script>
+</body>
+</html>

@@ -1,0 +1,299 @@
+/*
+===================================================================
+순발력 게임 - 고유 스타일
+===================================================================
+*/
+
+/* --- 로비 화면일 때만 중앙 정렬 적용 --- */
+#app-wrapper:has(#lobby-container:not(.hidden)) {
+    margin: 0 auto;
+}
+
+/* --- 전체 레이아웃 좌측 정렬 (게임 화면 기본값) --- */
+#app-wrapper {
+    max-width: 1600px;
+    margin: 0 auto 0 2px;
+}
+
+/* --- 턴 알림 팝업 --- */
+.turn-indicator-popup {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    padding: 2rem 4rem;
+    border-radius: 16px;
+    font-size: 2rem;
+    font-weight: bold;
+    z-index: 1000;
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+    transition: all 0.3s ease-in-out;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+}
+.turn-indicator-popup.show {
+    opacity: 1;
+    visibility: visible;
+    transform: translate(-50%, -50%) scale(1);
+}
+
+
+/* --- 상단 바 수정 --- */
+.top-bar-left {
+    gap: 1rem; /* 참가인원, 복사 버튼 사이 간격 */
+}
+
+/* --- 메인 게임 영역 레이아웃 조정 --- */
+#main-game-area {
+    display: grid;
+    grid-template-columns: 1.8fr 4.2fr; /* 플레이어목록 너비 확대 | 그리드 너비 축소 */
+    gap: 2rem;
+    align-items: stretch;
+}
+
+#player-list-board {
+    background: white;
+    border-radius: 16px;
+    padding: 1.5rem;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+#player-list-board .player-card {
+    padding: 0.5rem;
+    border-left-width: 5px;
+    transition: all 0.3s ease;
+    cursor: default;
+}
+
+/* 현재 턴 플레이어 하이라이트 */
+.player-card.current-turn {
+    transform: scale(1.05);
+    box-shadow: 0 4px 20px rgba(8, 126, 126, 0.4);
+    background-color: #f0fdfa;
+}
+/* 잭팟 위너는 자신의 카드를 클릭할 수 있음을 표시 */
+.player-card.jackpot-winner.is-me {
+    /* cursor: pointer !important; */ /* 이제 다른 카드도 클릭 가능하므로 제거 */
+    animation: pulse-winner-card 1.5s infinite;
+}
+@keyframes pulse-winner-card {
+    0% { box-shadow: 0 0 0 0 rgba(255, 193, 7, 0.7); }
+    70% { box-shadow: 0 0 0 10px rgba(255, 193, 7, 0); }
+    100% { box-shadow: 0 0 0 0 rgba(255, 193, 7, 0); }
+}
+
+/* '나혼자 말해요'에서 점수 부여 대상으로 지정 가능한 카드 */
+.player-card.point-target {
+    cursor: pointer !important;
+    animation: pulse-point-card 1.5s infinite;
+}
+@keyframes pulse-point-card {
+    0% { box-shadow: 0 0 0 0 rgba(76, 175, 80, 0.7); }
+    70% { box-shadow: 0 0 0 10px rgba(76, 175, 80, 0); }
+    100% { box-shadow: 0 0 0 0 rgba(76, 175, 80, 0); }
+}
+
+
+/* '모두가 말해요'에서 감점 대상으로 지정 가능한 카드 */
+.player-card.deduct-target {
+    cursor: crosshair !important;
+    animation: pulse-deduct-card 1.5s infinite;
+}
+@keyframes pulse-deduct-card {
+    0% { box-shadow: 0 0 0 0 rgba(239, 83, 80, 0.7); }
+    70% { box-shadow: 0 0 0 10px rgba(239, 83, 80, 0); }
+    100% { box-shadow: 0 0 0 0 rgba(239, 83, 80, 0); }
+}
+
+
+#player-list-board .profile-image-preview {
+    width: 40px;
+    height: 40px;
+}
+
+#player-list-board .player-name {
+    font-size: 1rem;
+}
+#player-list-board .player-score {
+    font-size: 1rem;
+    font-weight: bold;
+    margin-left: auto;
+    padding-right: 0.5rem;
+}
+
+
+/* --- 그리드 컨테이너 및 박스 --- */
+.grid-container {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    grid-template-rows: repeat(5, 1fr);
+    gap: 1vh;
+    background-color: #ffffff;
+    padding: 1.5vh;
+    border-radius: 12px;
+    box-shadow: 0 6px 24px rgba(0, 0, 0, 0.08);
+    transition: box-shadow 0.5s ease-in-out;
+    height: 70vh;
+}
+
+.box {
+    border: 1px solid #ddd;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.06);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    font-weight: 700;
+    color: #333;
+    background-color: #fff;
+    border-radius: 12px;
+    padding: 1vh;
+    box-sizing: border-box;
+    overflow: hidden;
+    transition: all 0.3s ease;
+    cursor: not-allowed;
+}
+.box.clickable { cursor: pointer; }
+.box.clickable:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 8px 15px rgba(0,0,0,0.1);
+}
+
+.highlight-neon {
+    border-color: #FDD835;
+    box-shadow: 0 0 2px #FDD835, 0 0 5px #FDD835, 0 0 10px #FDD835, 0 4px 12px rgba(0,0,0,0.06);
+}
+
+/* --- 특수 박스 (화살표, 중립) --- */
+.box.special, .box.neutral-box { background-color: transparent; border: none; box-shadow: none; }
+.neutral-box .neutral-text {
+    font-size: 4vh; /* 꽉차게 키움 */
+    font-weight: 900;
+    color: #333;
+    transition: color 0.3s ease;
+}
+.neutral-box .neutral-text.jackpot-text {
+    color: hotpink; /* 겹칠 때 분홍색으로 변경 */
+}
+
+@keyframes pop-in {
+    from { transform: scale(0.5); opacity: 0; }
+    to { transform: scale(1); opacity: 1; }
+}
+
+/* --- 트리거(Roll) 박스 --- */
+.box.trigger {
+    background: #ffffff; border: 2px solid; border-image-slice: 1;
+    border-image-source: linear-gradient(to bottom, #ccc, #aaa);
+    color: #888;
+    font-size: 2.5vh;
+    box-shadow: none;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+.box.trigger.host-ready {
+    border-image-source: linear-gradient(to bottom, #00BFFF, #7FFFD4);
+    color: #333;
+    box-shadow: 0 3px 6px rgba(0, 0, 0, 0.1);
+    cursor: pointer;
+}
+.box.trigger.jackpot-active {
+    animation: pulse-jackpot-box 1.5s infinite;
+    cursor: pointer;
+    border-image-source: linear-gradient(to bottom, #FFD700, #FF4500);
+}
+@keyframes pulse-jackpot-box {
+    0% { box-shadow: 0 0 0 0 rgba(239, 83, 80, 0.7); }
+    70% { box-shadow: 0 0 0 15px rgba(239, 83, 80, 0); }
+    100% { box-shadow: 0 0 0 0 rgba(239, 83, 80, 0); }
+}
+
+.dice-result { font-size: 3.5vh; font-weight: 700; line-height: 1; }
+.direction-arrow { font-size: 2.5vh; font-weight: 700; line-height: 1; }
+
+
+/* --- 박스 내부 콘텐츠 --- */
+.arrow-mark-container {
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
+    grid-template-rows: 1fr auto 1fr;
+    align-items: center;
+    justify-items: center;
+    width: 100%;
+    height: 100%;
+    gap: 0.5vh;
+}
+
+.special-box-mark {
+    grid-area: 2 / 2; /* 마크는 항상 중앙(2행 2열)에 고정 */
+}
+
+#box-r2c2 .special-box-mark { grid-area: 3 / 2; }
+#box-r4c2 .special-box-mark { grid-area: 1 / 2; }
+#box-r4c1, #box-r4c3, #box-r5c1, #box-r5c2, #box-r5c3 { flex-direction: column-reverse; }
+
+.arrow { font-size: 6vh; font-weight: 900; line-height: 1; }
+.special-box-mark { font-size: 3.5vh; font-weight: 700; line-height: 1; }
+.box-mark { font-size: 3.2vh; margin: 0.5vh 0; line-height: 1; font-weight: 700; }
+.box-text { font-size: 2vh; word-break: keep-all; line-height: 1.4; font-weight: 500; padding: 0 1vh; flex-grow: 1; display: flex; justify-content: center; align-items: center; }
+
+/* --- 방장 컨트롤 및 게임 모드 스위치 --- */
+#host-controls { display: flex; align-items: center; gap: 1rem; }
+.mode-switch-box {
+    position: relative;
+    display: flex;
+    align-items: center;
+    background-color: #e9ecef;
+    border-radius: 2rem;
+    padding: 4px;
+    user-select: none;
+    transition: background-color 0.3s;
+}
+.mode-switch-box:not(.disabled) {
+    cursor: pointer;
+}
+.mode-switch-box.disabled {
+    cursor: not-allowed;
+    opacity: 0.8;
+}
+.switch-option {
+    padding: 0.5rem 1rem;
+    font-size: 0.9rem;
+    font-weight: 500;
+    color: #495057;
+    z-index: 2;
+    transition: color 0.3s;
+}
+.switch-option.active {
+    color: white;
+}
+.switch-thumb {
+    position: absolute;
+    top: 4px;
+    left: 4px;
+    height: calc(100% - 8px);
+    border-radius: 2rem;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    z-index: 1;
+    transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+}
+.mode-switch-box[data-mode="나혼자 말해요"] .switch-thumb {
+    background-color: #ffc107;
+}
+.mode-switch-box[data-mode="모두가 말해요"] .switch-thumb {
+    background-color: #ef5350;
+}
+
+/* --- 모바일 반응형 --- */
+@media (max-width: 992px) {
+    #app-wrapper { margin: 0 auto; }
+    #main-game-area { grid-template-columns: 1fr; }
+    .grid-container { height: auto; aspect-ratio: 3 / 5; }
+}

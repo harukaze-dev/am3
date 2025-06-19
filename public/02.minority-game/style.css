@@ -1,0 +1,134 @@
+/*
+ * ===================================================================
+ *  소수결 게임 - 고유 스타일
+ * ===================================================================
+ */
+
+:root {
+    --optionA-color: #ff7043;
+    --optionB-color: #42a5f5;
+}
+
+/* --- 선택지 입력 --- */
+#options-container { margin-bottom: 2rem; }
+.options-input-wrapper { display: flex; align-items: center; gap: 1rem; }
+#optionA-input, #optionB-input {
+    width: 100%;
+    flex-grow: 1;
+    padding: 1rem;
+    font-size: 1.5rem;
+    font-weight: 700;
+    border: 2px solid transparent;
+    background-color: rgba(63, 81, 181, 0.05);
+    border-radius: 12px;
+    box-sizing: border-box;
+    text-align: center;
+    transition: background-color 0.2s, border-color 0.2s;
+    min-width: 0;
+}
+#optionA-input:focus { border-color: var(--optionA-color); }
+#optionB-input:focus { border-color: var(--optionB-color); }
+#optionA-input.confirmed, #optionB-input.confirmed { background-color: #fffde7; border-color: var(--accent-color); }
+#optionA-input:disabled, #optionB-input:disabled { background-color: rgba(0,0,0,0.02); color: #555; }
+.vs-divider { font-size: 2rem; font-weight: bold; color: var(--primary-color); }
+
+.confirm-options-btn {
+    flex-shrink: 0;
+    padding: 1rem 1.5rem;
+    font-size: 1.1rem;
+    font-weight: bold;
+    border: none;
+    border-radius: 12px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    white-space: nowrap;
+}
+.confirm-options-btn.confirm-mode { background-color: var(--mint-color); color: white; }
+.confirm-options-btn.edit-mode { background-color: var(--accent-color); color: var(--dark-text); }
+
+
+/* --- 플레이어 카드 내 선택지 버튼 --- */
+.player-action-area { 
+    /* 데스크톱 전용 스타일 */
+    grid-column: 2 / -1; 
+    display: flex; 
+    justify-content: flex-end; 
+    align-items: center; 
+    gap: 1rem; 
+}
+.btn-choice { padding: 1rem 2rem; font-size: 1.2rem; font-weight: bold; border: none; border-radius: 8px; cursor: pointer; color: white; transition: transform 0.2s; }
+.btn-choice:hover { transform: scale(1.05); }
+.btn-choice.option-a { background-color: var(--optionA-color); }
+.btn-choice.option-b { background-color: var(--optionB-color); }
+.btn-choice.cancel { background-color: #78909c; }
+.player-choice-display { font-size: 1.5rem; font-weight: bold; padding: 1rem; border-radius: 8px; }
+
+/* --- 누적 랭킹 점수 --- */
+#ranking-board .score { font-size: 1.1rem; color: #555; font-weight: bold; }
+
+/* --- 결과 화면 --- */
+.vote-counts { font-size: 2.5rem; font-weight: bold; margin: 1rem 0 0.5rem 0; }
+.winner-announcement { font-size: 1.5rem; font-weight: bold; color: var(--mint-color); margin: 0.5rem 0 1.5rem 0; }
+#player-choices-list { list-style-type: none; padding: 0; text-align: left; }
+#player-choices-list li { background: #f9f9f9; margin-bottom: 1rem; padding: 0.8rem 1.5rem; border-radius: 12px; border: 1px solid #eee; display: flex; justify-content: space-between; align-items: center; font-size: 1.1rem; }
+#player-choices-list li.winner { transform: scale(1.05); font-weight: bold; background: linear-gradient(135deg, #fffde7, #fff3e0); border: 2px solid var(--accent-color); box-shadow: 0 0 20px rgba(255, 193, 7, 0.6); }
+.player-choice-result { font-size: 1.2rem; font-weight: bold; padding: 0.5rem 1rem; border-radius: 8px; color: white; }
+
+
+/*
+ * ===================================================================
+ *  소수결 게임 - 모바일 & 태블릿 반응형 스타일
+ * ===================================================================
+ */
+@media (max-width: 992px) {
+    /* --- 선택지 입력 --- */
+    .options-input-wrapper {
+        flex-direction: column;
+        gap: 0.8rem;
+    }
+    #optionA-input, #optionB-input {
+        font-size: 1.1rem;
+        padding: 0.8rem;
+    }
+    .vs-divider {
+        font-size: 1.5rem;
+    }
+    .confirm-options-btn {
+        width: 100%;
+        padding: 0.8rem;
+    }
+
+    /* --- 플레이어 카드 내 선택지 버튼 --- */
+    .player-action-area {
+        display: flex;
+        flex-direction: column;
+        align-items: stretch;
+        gap: 0.5rem;
+    }
+    .btn-choice {
+        padding: 0.8rem 1rem;
+        font-size: 1rem;
+    }
+    .player-choice-display {
+        font-size: 1.1rem;
+        text-align: center;
+        padding: 0.8rem;
+    }
+
+    /* --- 결과 화면 --- */
+    .vote-counts {
+        font-size: 2rem;
+    }
+    .winner-announcement {
+        font-size: 1.2rem;
+    }
+    #player-choices-list li {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.8rem;
+    }
+    .player-choice-result {
+        width: 100%;
+        text-align: center;
+    }
+}

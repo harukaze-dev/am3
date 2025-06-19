@@ -1,0 +1,232 @@
+/*
+ * ===================================================================
+ *  워드 마피아 - 고유 스타일
+ * ===================================================================
+ */
+
+ /* --- 게임 컨트롤 영역 --- */
+#game-controls-area { background: white; padding: 1.5rem 2rem; border-radius: 12px; margin-bottom: 2rem; box-shadow: 0 2px 8px rgba(0,0,0,0.05); }
+.control-box { display: flex; justify-content: space-between; align-items: center; }
+.control-box-left h3 { margin: 0; color: var(--primary-color); }
+.control-box-left p { margin: 0.25rem 0 0 0; color: #666; }
+.control-btn { padding: 0.8rem 1.5rem; font-size: 1.1rem; font-weight: bold; border-radius: 8px; border: none; cursor: pointer; background-color: var(--mint-color); color: white; transition: background-color 0.2s; }
+.control-btn:disabled { background-color: #ccc; cursor: not-allowed; }
+
+/* --- 플레이어 카드 UI --- */
+.player-card.dead .profile-image-preview { filter: grayscale(100%); opacity: 0.5; }
+.player-card.dead .player-name-wrapper { text-decoration: line-through; color: #999; }
+.player-card.submitted { border-right: 8px solid var(--mint-color); background-color: #f0faf9; }
+.player-name-wrapper { display: flex; align-items: center; gap: 0.75rem; flex-grow: 1; }
+.my-word-display { font-size: 1.5rem; font-weight: 700; color: var(--primary-color); background-color: #e8eaf6; padding: 0.4rem 1rem; border-radius: 8px; margin-left: auto; }
+
+/* --- 투표 버튼 및 상태 UI --- */
+.player-action-area { display: flex; align-items: center; gap: 0.75rem; justify-content: flex-end; min-width: 150px; }
+.vote-button { background-color: #e57373; color: white; border: none; padding: 0.8rem 1.5rem; border-radius: 8px; cursor: pointer; font-weight: bold; font-size: 1rem; transition: background-color 0.2s; }
+.vote-button:hover:not(:disabled) { background-color: #d32f2f; }
+.vote-button:disabled { background-color: #ccc; cursor: not-allowed; }
+.cancel-vote-button { background-color: #78909c; color: white; border: none; padding: 0.8rem 1.5rem; border-radius: 8px; cursor: pointer; font-weight: bold; font-size: 1rem; transition: background-color 0.2s; }
+.cancel-vote-button:hover { background-color: #546e7a; }
+.vote-status { font-weight: bold; color: #888; font-size: 1rem; }
+.vote-count { font-size: 1.2rem; font-weight: bold; }
+
+/* --- 최종 추리 / 개표 결과 UI --- */
+.reveal-box { text-align: center; padding: 2rem; background: white; border-radius: 16px; margin-top: 2rem; box-shadow: 0 4px 15px rgba(0,0,0,0.05); }
+.reveal-box h2 { margin-top: 0; color: var(--primary-color); }
+.reveal-box p { font-size: 1.2rem; margin: 1rem 0; }
+.reveal-box .highlight { font-weight: bold; font-size: 1.5rem; color: #e53935; }
+.reveal-box input { padding: 0.8rem; font-size: 1rem; width: 60%; max-width: 300px; border-radius: 8px; border: 1px solid #ccc; margin: 0 0.5rem; }
+.reveal-box .control-btn { margin-top: 1rem; }
+
+/* 개표 결과 플레이어 목록 스타일 */
+#vote-result-players { list-style: none; padding: 0; margin-top: 1.5rem; padding-top: 1.5rem; border-top: 1px solid #eee; display: flex; flex-direction: column; gap: 1rem; }
+.vote-result-player-card { background: #f9f9f9; border: 1px solid #eee; border-radius: 12px; padding: 0.8rem 1.5rem; display: flex; align-items: center; justify-content: space-between; }
+.vote-result-player-card.most-voted { border: 2px solid var(--primary-color); transform: scale(1.02); font-weight: bold; }
+.vote-result-player-card .player-info { display: flex; align-items: center; gap: 1rem; }
+.vote-result-player-card img { width: 50px; height: 50px; border-radius: 50%; object-fit: cover; }
+.vote-result-player-card .name { font-size: 1.1rem; }
+
+/* --- 최종 결과 화면 --- */
+#result-display { text-align: center; padding: 3rem; background: white; border-radius: 16px; margin-top: 2rem; }
+.result-title { font-size: 3rem; font-weight: bold; }
+.citizen-win { color: #4CAF50; }
+.mafia-win { color: #f44336; }
+.result-details { margin-top: 1rem; font-size: 1.2rem; }
+/* [수정됨] 닉네임 강조 스타일 */
+.result-details .highlight {
+    padding: 0.2rem 0.5rem;
+    border-radius: 4px;
+    color: white; /* 기본 글자색 흰색으로 */
+    background-color: #e53935; /* 마피아 승리 시 배경색 */
+}
+.result-details .highlight.guess { background-color: #757575; }
+.result-details .highlight.citizen { background-color: #1E88E5; }
+
+
+/* 결과 단어 강조 */
+.word-reveal-box { display: flex; justify-content: center; gap: 2rem; margin-top: 1.5rem; background: #f5f5f5; padding: 1rem; border-radius: 12px; }
+.word-reveal-item { text-align: center; }
+.word-reveal-item p { margin: 0; color: #666; font-size: 0.9rem; }
+.word-reveal-item .word { font-size: 1.5rem; font-weight: bold; }
+.word-reveal-item .word.citizen { color: #1E88E5; }
+.word-reveal-item .word.mafia { color: #E53935; }
+
+
+/* 결과 플레이어 카드 */
+#result-players-container { margin-top: 2rem; list-style: none; padding: 0; display: flex; flex-direction: column; gap: 1rem; }
+.result-player-card { background: #f9f9f9; border: 1px solid #eee; border-radius: 12px; padding: 0.8rem 1.5rem; display: flex; align-items: center; justify-content: space-between; position: relative; transition: all 0.2s; }
+.result-player-card.winner { transform: scale(1.02); border: 2px solid #FFD700; background-color: #fffde7; }
+/* [수정됨] 패배자 카드 해골 제거 */
+.result-player-card.loser { opacity: 0.8; }
+.result-player-card .player-info { display: flex; align-items: center; gap: 1rem; }
+.result-player-card img { width: 50px; height: 50px; border-radius: 50%; object-fit: cover; }
+.result-player-card .name { font-weight: bold; font-size: 1.1rem; }
+/* [수정됨] 결과 카드 단어 표시 스타일 */
+.result-player-card .role {
+    font-size: 1.1rem;
+    font-weight: bold;
+    padding: 0.4rem 1rem;
+    border-radius: 8px;
+    color: white;
+}
+.result-player-card .role.citizen { background-color: #1E88E5; }
+.result-player-card .role.mafia { background-color: #E53935; }
+
+/*
+ * ===================================================================
+ *  워드 마피아 - 모바일 & 태블릿 반응형 스타일
+ * ===================================================================
+ */
+@media (max-width: 992px) {
+    /* --- 게임 컨트롤 영역 --- */
+    #game-controls-area {
+        padding: 1rem;
+        margin-bottom: 1.5rem;
+    }
+    .control-box {
+        flex-direction: column; /* 세로 배치 */
+        align-items: stretch;   /* 좌우로 꽉 채움 */
+        gap: 0.8rem;
+        text-align: center;
+    }
+    .control-box-left h3 {
+        font-size: 1.2rem;
+    }
+    .control-box-left p {
+        font-size: 0.9rem;
+    }
+    .control-btn {
+        width: 100%; /* 버튼 너비 100% */
+        padding: 0.8rem;
+        font-size: 1rem;
+    }
+
+    /* --- 플레이어 카드 내 단어 표시 --- */
+    .my-word-display {
+        font-size: 1rem;
+        padding: 0.4rem 0.6rem;
+        /* common.css에서 .player-info-text가 column으로 바뀌므로 margin-left 제거 */
+        margin-left: 0; 
+        margin-top: 0.2rem; /* 이름과 간격 주기 */
+    }
+
+    /* --- 투표 버튼 및 상태 UI (핵심 개선 영역) --- */
+    /* common.css에서 .player-action-area가 이미 column으로 변경됨 */
+    .vote-button,
+    .cancel-vote-button {
+        width: 100%;
+        padding: 0.8rem 1rem;
+        font-size: 0.9rem;
+    }
+
+    /* --- 최종 추리 / 개표 결과 UI --- */
+    .reveal-box {
+        padding: 1.5rem 1rem;
+        margin-top: 1.5rem;
+    }
+    .reveal-box h2 {
+        font-size: 1.3rem;
+    }
+    .reveal-box p {
+        font-size: 1rem;
+    }
+    .reveal-box .highlight {
+        font-size: 1.2rem;
+    }
+    .reveal-box input {
+        width: 100%;
+        margin: 0;
+        margin-top: 0.5rem;
+        box-sizing: border-box; /* 패딩, 보더 포함 너비 계산 */
+    }
+
+    /* 개표 결과 플레이어 목록 */
+    .vote-result-player-card {
+        flex-direction: column; /* 세로 배치 */
+        align-items: flex-start; /* 왼쪽 정렬 */
+        gap: 0.5rem;
+        padding: 0.8rem 1rem;
+    }
+    .vote-result-player-card .player-info {
+        gap: 0.8rem;
+    }
+    .vote-result-player-card img {
+        width: 40px;
+        height: 40px;
+    }
+    .vote-result-player-card .name {
+        font-size: 1rem;
+    }
+    .vote-count {
+        align-self: flex-end; /* 투표 수는 오른쪽 끝으로 */
+        font-size: 1.1rem;
+    }
+
+
+    /* --- 최종 결과 화면 --- */
+    #result-display {
+        padding: 2rem 1rem;
+        margin-top: 1.5rem;
+    }
+    .result-title {
+        font-size: 2rem;
+    }
+    .result-details {
+        font-size: 1rem;
+        line-height: 1.6; /* 줄간격 추가로 가독성 확보 */
+    }
+    
+    /* 결과 단어 강조 */
+    .word-reveal-box {
+        flex-direction: column; /* 세로 배치 */
+        gap: 1rem;
+        padding: 1rem;
+    }
+    .word-reveal-item .word {
+        font-size: 1.3rem;
+    }
+
+    /* 결과 플레이어 카드 */
+    .result-player-card {
+        padding: 0.8rem 1rem;
+        align-items: center; /* 세로 중앙 정렬 유지 */
+        flex-wrap: wrap;     /* 내용이 많으면 줄바꿈 허용 */
+        gap: 0.5rem 1rem;    /* 세로, 가로 간격 */
+    }
+    .result-player-card .player-info {
+        gap: 0.8rem;
+        flex-grow: 1; /* 이름 영역이 남는 공간을 차지하도록 */
+    }
+    .result-player-card img {
+        width: 40px;
+        height: 40px;
+    }
+    .result-player-card .name {
+        font-size: 1rem;
+    }
+    /* 역할/단어 표시 태그 */
+    .result-player-card .role {
+        font-size: 0.9rem;
+        padding: 0.4rem 0.8rem;
+        flex-shrink: 0; /* 크기가 줄어들지 않도록 */
+    }
+}

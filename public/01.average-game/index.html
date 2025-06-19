@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>XX평</title>
+    <link rel="stylesheet" href="/css/common.css">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body class="in-lobby">
+    <!-- 네비게이션 바는 nav.js가 동적으로 생성합니다. -->
+    
+    <div id="toast-container"></div>
+    <div id="app-wrapper">
+        <div id="lobby-container" class="lobby-container">
+            <h1>XX평</h1>
+            <div class="lobby-step">
+                <h2>닉네임 & 프로필 설정</h2>
+                <div class="lobby-profile-container">
+                    <img id="lobby-profile-preview" src="/assets/default-profile.png" alt="Profile Preview">
+                    <input type="file" id="lobby-profile-input" class="hidden" accept="image/*">
+                    <p>이미지를 클릭하여 변경</p>
+                </div>
+                <input type="text" id="player-name-input" placeholder="사용할 닉네임을 입력하세요 (8자 이내)" maxlength="8">
+            </div>
+            <div id="room-actions" class="hidden">
+                <div class="action-box">
+                    <h3>새로운 게임 시작</h3>
+                    <button id="create-room-btn">방 만들기</button>
+                </div>
+                <div class="action-box">
+                    <h3>초대 코드로 참가</h3>
+                    <input type="password" id="room-code-input" placeholder="초대 코드 입력">
+                    <button id="join-room-btn">참가하기</button>
+                </div>
+            </div>
+        </div>
+
+        <div id="game-container" class="container hidden">
+            <div id="player-count-container">
+                <div id="player-count-display" class="info-box"></div>
+            </div>
+
+            <div id="top-bar">
+                <div class="top-bar-left">
+                    <button id="copy-code-btn">방 초대코드 복사</button>
+                </div>
+                <h1 class="top-bar-title">XX평</h1>
+                <div class="top-bar-right">
+                    <div id="host-controls">
+                        <button id="view-results-button" class="hidden" disabled>결과 보기</button>
+                        <button id="reset-round-button" class="hidden">다음 질문</button>
+                    </div>
+                </div>
+            </div>
+
+            <div id="question-container" class="hidden">
+                <div class="question-input-wrapper">
+                    <input type="text" id="question-input" placeholder="Q. 여기에 질문을 입력하세요">
+                    <button id="confirm-question-btn" class="confirm-question-btn hidden">질문 확정</button>
+                </div>
+            </div>
+            
+            <div id="results" class="hidden">
+                <!-- 결과 내용은 client.js가 동적으로 생성 -->
+            </div>
+            
+            <div id="main-game-area" class="hidden">
+                <div id="game-board"></div>
+                <div id="side-panel-container" class="ranking-board-container">
+                    <div class="side-panel-header">
+                        <h3 id="side-panel-title">누적 랭킹</h3>
+                        <button id="toggle-history-btn">과거 기록</button>
+                    </div>
+                    <div id="ranking-board"></div>
+                    <div id="history-board" class="hidden"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="/js/nav.js"></script> 
+    <script src="/socket.io/socket.io.js"></script>
+    <script src="client.js"></script>
+</body>
+</html>
