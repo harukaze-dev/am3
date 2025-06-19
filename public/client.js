@@ -93,22 +93,39 @@ let sortable = null;
 let resizingColumn = null;
 
 /**
- * 브라우저에 내장된 TTS 목소리를 비동기적으로 로드하고 팬덤별로 할당하는 함수.
+ * [수정] 브라우저 TTS 기능을 안정적으로 초기화하고 목소리를 할당하는 함수.
+ * 음성 목록이 이미 로드되었으면 즉시 할당하고, 그렇지 않으면 로드될 때까지 기다립니다.
  */
-function loadTTSVoices() {
-    window.speechSynthesis.onvoiceschanged = () => {
+function initializeTTS() {
+    // 실제 목소리를 할당하는 함수
+    const assignVoices = () => {
+        // 사용 가능한 모든 목소리 가져오기
         ttsVoices = window.speechSynthesis.getVoices();
+        // 한국어 목소리만 필터링
         const koreanVoices = ttsVoices.filter(voice => voice.lang === 'ko-KR');
-        const fandoms = ['yeonbab', 'coral', 'digdan'];
-
-        if (koreanVoices.length > 0) {
-            fandoms.forEach((fandomId, index) => {
-                fandomVoiceMap[fandomId] = koreanVoices[index % koreanVoices.length];
+        
+        // 게임 설정이 있고 한국어 목소리가 하나 이상 있을 때
+        if (gameConfig && koreanVoices.length > 0) {
+            // 각 스트리머의 팬덤에 한국어 목소리를 순환 할당
+            gameConfig.streamers.forEach((streamer, index) => {
+                fandomVoiceMap[streamer.fandom.id] = koreanVoices[index % koreanVoices.length];
             });
+            console.log("TTS voices loaded and mapped:", fandomVoiceMap);
+        } else if (koreanVoices.length === 0) {
+            // 한국어 목소리가 없을 경우 경고 메시지 출력
+            console.warn("No Korean (ko-KR) TTS voices found. TTS will use the default voice.");
         }
-        console.log("TTS voices loaded and mapped:", fandomVoiceMap);
     };
-    window.speechSynthesis.getVoices();
+
+    // 브라우저의 음성 목록이 이미 로드되어 있는지 확인
+    if (window.speechSynthesis.getVoices().length > 0) {
+        // 이미 로드되었다면 즉시 목소리 할당 함수 호출
+        assignVoices();
+    } else {
+        // 아직 로드되지 않았다면, 'voiceschanged' 이벤트가 발생했을 때 할당 함수를 호출하도록 설정
+        // 이 방법은 TTS 기능의 불안정한 초기화 문제를 해결합니다.
+        window.speechSynthesis.onvoiceschanged = assignVoices;
+    }
 }
 
 
@@ -118,26 +135,28 @@ function loadTTSVoices() {
  * @param {string} fanGroup - 팬의 소속 팬덤 ID. 이 값에 따라 목소리가 결정됩니다.
  */
 function speak(text, fanGroup) {
-    if (currentVolume === 0) return;
+    if (currentVolume === 0) return; // 볼륨이 0이면 재생하지 않음
 
     const utterance = new SpeechSynthesisUtterance(text);
     let selectedVoice = null;
 
-    window.speechSynthesis.cancel();
+    window.speechSynthesis.cancel(); // 이전에 재생 중이던 음성이 있다면 중단
 
+    // '가짜팬 찾기' 모드이고, 팬덤 그룹에 할당된 목소리가 있으면 해당 목소리 사용
     if (currentMode === 'fakefan' && fanGroup && fandomVoiceMap[fanGroup]) {
         selectedVoice = fandomVoiceMap[fanGroup];
     } else {
+        // 그 외의 경우, 또는 할당된 목소리가 없는 경우 기본 한국어 목소리 탐색
         selectedVoice = ttsVoices.find(voice => voice.lang === 'ko-KR');
     }
 
     if (selectedVoice) {
-        utterance.voice = selectedVoice;
+        utterance.voice = selectedVoice; // 찾은 목소리 설정
     }
 
-    utterance.volume = currentVolume;
+    utterance.volume = currentVolume; // 현재 설정된 볼륨 적용
 
-    window.speechSynthesis.speak(utterance);
+    window.speechSynthesis.speak(utterance); // 음성 재생
 }
 
 /**
@@ -349,7 +368,6 @@ function updateFanTiers() {
 function initializeResizeHandles() {
     document.querySelectorAll('.column-resize-handle').forEach(handle => {
         handle.addEventListener('mousedown', (e) => {
-            // [수정] 볼륨 조절 UI 드래그와의 충돌 방지
             if (e.target.closest('.volume-control-container')) return;
             e.preventDefault();
             resizingColumn = handle.closest('.chat-column');
@@ -400,7 +418,7 @@ function setupSettingsMenus() {
 
 
 /**
- * [수정] 로비/프로필 화면을 숨기고 선택된 모드에 맞는 채팅방 UI를 보여주는 함수. 볼륨 조절 이벤트 리스너를 설정합니다.
+ * 로비/프로필 화면을 숨기고 선택된 모드에 맞는 채팅방 UI를 보여주는 함수. 볼륨 조절 이벤트 리스너를 설정합니다.
  */
 function showChatRoom() {
     mainMenu.classList.add('hidden');
@@ -419,7 +437,6 @@ function showChatRoom() {
         sortable = Sortable.create(multiChatView, { 
             animation: 150, 
             handle: '.chat-column-header',
-            // [수정] 볼륨 조절 UI는 드래그 핸들에서 제외
             filter: '.volume-control-container, .settings-container' 
         });
         initializeResizeHandles();
@@ -438,9 +455,8 @@ function showChatRoom() {
     }
     setupSettingsMenus();
 
-    // [신규] 새로운 볼륨 조절 UI 이벤트 리스너 설정
     document.querySelectorAll('.volume-btn').forEach(btn => {
-        btn.textContent = currentVolume > 0 ? '🔊' : '🔇'; // 초기 아이콘 설정
+        btn.textContent = currentVolume > 0 ? '🔊' : '🔇';
         btn.addEventListener('click', (e) => {
             e.stopPropagation();
             if (currentVolume > 0) {
@@ -449,20 +465,18 @@ function showChatRoom() {
             } else {
                 currentVolume = lastVolumeBeforeMute;
             }
-            // 모든 볼륨 UI 동기화
             document.querySelectorAll('.volume-slider-vertical').forEach(s => s.value = currentVolume);
             document.querySelectorAll('.volume-btn').forEach(b => b.textContent = currentVolume > 0 ? '🔊' : '🔇');
         });
     });
 
     document.querySelectorAll('.volume-slider-vertical').forEach(slider => {
-        slider.value = currentVolume; // 초기 위치 설정
+        slider.value = currentVolume;
         slider.addEventListener('input', (e) => {
             currentVolume = parseFloat(e.target.value);
             if (currentVolume > 0) {
                 lastVolumeBeforeMute = currentVolume;
             }
-            // 모든 볼륨 UI 동기화
             document.querySelectorAll('.volume-slider-vertical').forEach(s => s.value = currentVolume);
             document.querySelectorAll('.volume-btn').forEach(b => b.textContent = currentVolume > 0 ? '🔊' : '🔇');
         });
@@ -618,7 +632,7 @@ document.addEventListener('mouseup', () => {
 socket.on('server config', (config) => {
     gameConfig = config;
     initialize();
-    loadTTSVoices();
+    initializeTTS(); // [수정] 안정화된 TTS 초기화 함수 호출
 });
 
 socket.on('room mode response', ({ mode }) => {
@@ -705,7 +719,7 @@ socket.on('error message', (message) => {
 });
 
 /**
- * [수정] 채팅 메시지 화면 추가 및 모달 실시간 업데이트
+ * [수정] 채팅 메시지 수신 시 TTS 재생 범위를 제한하는 로직 추가
  */
 function addChatMessage(data) {
     playSound('chat.MP3');
@@ -714,8 +728,30 @@ function addChatMessage(data) {
     const targetMessageList = document.getElementById(chatGroupId === 'main' ? 'messages' : `messages-${chatGroupId}`);
     if (!targetMessageList) return;
 
+    // [수정] TTS 재생 조건 추가
     if (user.role === 'fan') {
-        speak(message, user.fanGroup);
+        let shouldSpeak = false;
+        if (currentMode === 'guess_group') {
+            // '팬덤 맞추기' 모드에서는 모든 팬 메시지를 읽음
+            shouldSpeak = true;
+        } else if (currentMode === 'fakefan') {
+            // '가짜팬 찾기' 모드에서는 자신이 속한 채널의 메시지만 읽음
+            let myChannelId;
+            if (currentUserData.role === 'streamer') {
+                myChannelId = currentUserData.streamerId;
+            } else { // 팬인 경우
+                const myStreamer = gameConfig.streamers.find(s => s.fandom.id === currentUserData.fanGroup);
+                myChannelId = myStreamer?.id;
+            }
+            // 메시지가 발생한 채널 ID와 나의 채널 ID가 같으면 재생
+            if (chatGroupId === myChannelId) {
+                shouldSpeak = true;
+            }
+        }
+
+        if (shouldSpeak) {
+            speak(message, user.fanGroup);
+        }
     }
 
     const item = document.createElement('li');
@@ -794,11 +830,9 @@ function addChatMessage(data) {
     targetMessageList.appendChild(item);
     targetMessageList.scrollTop = targetMessageList.scrollHeight;
 
-    // '정체 맞추기' 모달 실시간 업데이트 로직
     if (!privateGuessModal.classList.contains('hidden') && privateGuessTargetUser) {
         const modalStreamerId = privateGuessTargetInfo.dataset.streamerId;
         if (chatGroupId === modalStreamerId && (user.id === privateGuessTargetUser.id || user.id === currentUserData.id)) {
-            // 새 메시지를 복제하여 모달에 추가
             privateChatLog.appendChild(item.cloneNode(true));
             privateChatLog.scrollTop = privateChatLog.scrollHeight;
         }
@@ -844,7 +878,6 @@ socket.on('guesses updated', (guesses) => {
             });
         }
     }
-    // [수정] 모달이 열려있을 때 추측이 업데이트 되면, 모달 안의 팬 목록도 다시 그려서 태그를 갱신
     if (!privateGuessModal.classList.contains('hidden') && privateGuessTargetUser) {
         const streamerId = privateGuessTargetInfo.dataset.streamerId;
         openPrivateGuessModal(privateGuessTargetUser, streamerId);
@@ -933,7 +966,7 @@ socket.on('game over', (results) => {
             gameOverBody.appendChild(groupDiv);
         });
     } else if (currentMode === 'guess_group') {
-        const rankingsContainer = document.createElement('div'); // 좌측 영역
+        const rankingsContainer = document.createElement('div');
         results.rankings.forEach(rankedStreamer => {
             const rankerDiv = document.createElement('div');
             rankerDiv.className = 'ranking-item';
@@ -942,7 +975,7 @@ socket.on('game over', (results) => {
             rankingsContainer.appendChild(rankerDiv);
         });
 
-        const fanRevealContainer = document.createElement('div'); // 우측 영역
+        const fanRevealContainer = document.createElement('div');
         fanRevealContainer.className = 'fandom-identity-group';
         const allFans = allUsers.filter(u => u.role === 'fan');
         allFans.forEach(user => {
@@ -1057,9 +1090,6 @@ function openChannelParticipantsModal(streamerId) {
 }
 
 
-/**
- * [수정] '정체 맞추기' 모달을 열고, 같은 채널의 다른 팬 목록을 생성/업데이트하는 함수
- */
 function openPrivateGuessModal(targetUser, chatGroupId) {
     privateGuessTargetUser = targetUser;
     privateGuessTargetInfo.dataset.streamerId = chatGroupId;
@@ -1131,7 +1161,6 @@ function openPrivateGuessModal(targetUser, chatGroupId) {
         }
     });
 
-    // [신규] 같은 채널의 다른 팬 목록 생성 로직
     otherFansListContainer.innerHTML = '';
     const otherFansInChannel = allUsers.filter(u => 
         u.role === 'fan' && u.fanGroup === targetUser.fanGroup && u.id !== targetUser.id
@@ -1152,7 +1181,6 @@ function openPrivateGuessModal(targetUser, chatGroupId) {
 
         fanItem.innerHTML = fanPfp + fanName + fanGuessTag;
 
-        // 클릭 시 해당 팬으로 모달 내용 변경
         fanItem.addEventListener('click', () => {
             openPrivateGuessModal(fan, chatGroupId);
         });

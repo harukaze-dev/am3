@@ -124,9 +124,9 @@ io.on('connection', (socket) => {
   socket.on('create room', (data) => {
     const { userData, mode } = data;
     
-    // [수정] 스트리머 역할일 경우, 서버에서 직접 인증 키를 확인
+    // 스트리머 역할일 경우, 서버에서 직접 인증 키를 확인
     if (userData.role === 'streamer') {
-        const STREAMER_KEY = 'am3'; // 서버에 저장된 스트리머 인증 키
+        const STREAMER_KEY = 'mhyam3'; // [수정] 요청에 따라 스트리머 인증 키 변경
         if (userData.streamerKey !== STREAMER_KEY) {
             return socket.emit('error message', '스트리머 인증 키가 올바르지 않습니다.');
         }
@@ -159,9 +159,9 @@ io.on('connection', (socket) => {
   socket.on('join room', (data) => {
     const { roomId, userData } = data;
 
-    // [수정] 스트리머 역할일 경우, 서버에서 직접 인증 키를 확인
+    // 스트리머 역할일 경우, 서버에서 직접 인증 키를 확인
     if (userData.role === 'streamer') {
-        const STREAMER_KEY = 'am3';
+        const STREAMER_KEY = 'mhyam3'; // [수정] 요청에 따라 스트리머 인증 키 변경
         if (userData.streamerKey !== STREAMER_KEY) {
             return socket.emit('error message', '스트리머 인증 키가 올바르지 않습니다.');
         }
