@@ -12,6 +12,12 @@ const io = new Server(server);
 // 정적 파일(HTML, CSS, JS)을 제공하기 위한 미들웨어 설정
 app.use(express.static(__dirname + '/public'));
 
+// UptimeRobot 같은 모니터링 서비스가 서버가 살아있는지 확인할 수 있도록,
+// 가볍게 "OK"만 응답하는 경로를 만듭니다.
+app.get('/health', (req, res) => {
+  res.status(200).send('OK');
+});
+
 // 방 정보를 저장할 Map 객체
 const rooms = new Map();
 
